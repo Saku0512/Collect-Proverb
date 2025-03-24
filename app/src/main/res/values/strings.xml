@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">Collect Proverb</string>
+    <string name="test_text">TestText</string>
 </resources>
