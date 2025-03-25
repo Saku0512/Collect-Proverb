@@ -6,7 +6,7 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/lightOrange"
+    android:background="@color/whiteBrown"
     tools:context=".MainActivity">
 
     <!-- 高さの5%の位置にガイドラインを設定 -->
@@ -31,6 +31,7 @@
         android:layout_height="wrap_content"
         android:text="@string/header"
         android:textSize="30sp"
+        android:textColor="@color/black"
         app:layout_constraintStart_toStartOf="@id/guideline_left"
         app:layout_constraintTop_toBottomOf="@id/guideline" /><!-- 画面高さの5%に合わせる -->
 
@@ -40,10 +41,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:contentDescription="@string/cloud_description"
-        android:src="@drawable/cloud"
+        android:src="@drawable/cloud_background"
         app:layout_constraintTop_toBottomOf="@id/textView"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintStart_toStartOf="@id/guideline_left" />
 
     <!-- 雲の中のテキスト -->
     <TextView
