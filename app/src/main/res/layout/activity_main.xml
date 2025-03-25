@@ -34,4 +34,28 @@
         app:layout_constraintStart_toStartOf="@id/guideline_left"
         app:layout_constraintTop_toBottomOf="@id/guideline" /><!-- 画面高さの5%に合わせる -->
 
+    <!-- 雲の背景 -->
+    <ImageView
+        android:id="@+id/cloudBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/cloud_description"
+        android:src="@drawable/cloud"
+        app:layout_constraintTop_toBottomOf="@id/textView"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
+
+    <!-- 雲の中のテキスト -->
+    <TextView
+        android:id="@+id/cloudText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/noproverbyet"
+        android:textSize="20sp"
+        android:textColor="@android:color/black"
+        app:layout_constraintTop_toTopOf="@id/cloudBackground"
+        app:layout_constraintBottom_toBottomOf="@id/cloudBackground"
+        app:layout_constraintStart_toStartOf="@id/cloudBackground"
+        app:layout_constraintEnd_toEndOf="@id/cloudBackground" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
