@@ -1,22 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/lightOrange"
     tools:context=".MainActivity">
+
+    <!-- 高さの5%の位置にガイドラインを設定 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.05" /> <!-- 画面高さの5%の位置 -->
+
+    <!-- 左マージン 10vw の位置にガイドラインを設定 -->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_left"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.10" /> <!-- 画面幅の10%の位置 -->
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="91dp"
-        android:layout_height="57dp"
-        android:text="@string/test_text"
-        tools:layout_editor_absoluteX="123dp"
-        tools:layout_editor_absoluteY="146dp"
-        tools:text="@tools:sample/cities"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent" />
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/header"
+        android:textSize="30sp"
+        app:layout_constraintStart_toStartOf="@id/guideline_left"
+        app:layout_constraintTop_toBottomOf="@id/guideline" /><!-- 画面高さの5%に合わせる -->
+
 </androidx.constraintlayout.widget.ConstraintLayout>
