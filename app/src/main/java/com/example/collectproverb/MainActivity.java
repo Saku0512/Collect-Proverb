@@ -9,6 +9,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.LinearLayout;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -70,6 +71,12 @@ public class MainActivity extends AppCompatActivity {
                 setShape(GradientDrawable.RECTANGLE);
                 setCornerRadius(cornerRadius);
             }});
+
+            // "次へ"ボタンの左マージンを設定
+            Button nextButton = popupView.findViewById(R.id.next_button);
+            LinearLayout.LayoutParams nextButtonParams = (LinearLayout.LayoutParams) nextButton.getLayoutParams();
+            nextButtonParams.setMargins((int) (width * 0.4), 0, 0, 0); // 左マージンを60%に設定
+            nextButton.setLayoutParams(nextButtonParams);
 
             // 変更を適用
             window.setAttributes(layoutParams);

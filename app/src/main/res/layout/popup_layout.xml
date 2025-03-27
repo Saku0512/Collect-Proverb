@@ -4,7 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_gravity="center">
+    android:layout_gravity="center"
+    app:cardBackgroundColor="@color/whiteBrown">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -21,15 +22,31 @@
             android:textColor="@android:color/black"
             android:layout_marginBottom="16dp"/>
 
-        <Button
-            android:id="@+id/close_button"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/popup_close_text"
-            android:backgroundTint="@color/lightOrange"
-            android:textColor="@android:color/black"
-            android:layout_gravity="end"/>
+            android:orientation="horizontal">
 
+            <Button
+                android:id="@+id/close_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/popup_close_text"
+                android:backgroundTint="@color/lightOrange"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:layout_gravity="end"/>
+
+            <Button
+                android:id="@+id/next_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/popup_next_text"
+                android:backgroundTint="@color/lightOrange"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:layout_gravity="end"/>
+
+        </LinearLayout>
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
