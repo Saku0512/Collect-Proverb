@@ -32,6 +32,14 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.37" /> <!-- 雲の背景の下 + 5% の位置 -->
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_list_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.53"/> <!-- ボタンの下 + 5% の位置 -->
+
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -77,6 +85,26 @@
         app:layout_constraintStart_toStartOf="@id/cloudBackground"
         app:layout_constraintEnd_toEndOf="@+id/cloudBackground"
         tools:ignore="MissingConstraints" />
+
+    <TextView
+        android:id="@+id/proverb_list"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/proverb_list"
+        android:textSize="30sp"
+        android:textColor="@color/black"
+        app:layout_constraintTop_toTopOf="@id/guideline_list_margin"
+        app:layout_constraintStart_toStartOf="@id/get_button"/>
+
+    <!-- 格言一覧の背景 -->
+    <ImageView
+        android:id="@+id/listBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/list_description"
+        android:src="@drawable/list_background"
+        app:layout_constraintTop_toBottomOf="@id/proverb_list"
+        app:layout_constraintStart_toStartOf="@id/guideline_left" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
