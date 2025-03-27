@@ -1,142 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/whiteBrown"
-    tools:context=".MainActivity">
+    android:fillViewport="true">
 
-    <!-- 高さの5%の位置にガイドラインを設定 -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.05" /> <!-- 画面高さの5%の位置 -->
-
-    <!-- 左マージン 10vw の位置にガイドラインを設定 -->
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_left"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        app:layout_constraintGuide_percent="0.10" /> <!-- 画面幅の10%の位置 -->
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_button_margin"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.37" /> <!-- 雲の背景の下 + 5% の位置 -->
-
-    <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/guideline_list_margin"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="horizontal"
-        app:layout_constraintGuide_percent="0.53"/> <!-- ボタンの下 + 5% の位置 -->
-
-    <TextView
-        android:id="@+id/textView"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/main"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/header"
-        android:textSize="30sp"
-        android:textColor="@color/black"
-        app:layout_constraintStart_toStartOf="@id/guideline_left"
-        app:layout_constraintTop_toBottomOf="@id/guideline" /><!-- 画面高さの5%に合わせる -->
+        android:background="@color/whiteBrown"
+        tools:context=".MainActivity">
 
-    <!-- 雲の背景 -->
-    <ImageView
-        android:id="@+id/cloudBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/cloud_description"
-        android:src="@drawable/cloud_background"
-        app:layout_constraintTop_toBottomOf="@id/textView"
-        app:layout_constraintStart_toStartOf="@id/guideline_left" />
+        <!-- 高さの5%の位置にガイドラインを設定 -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.05" /> <!-- 画面高さの5%の位置 -->
 
-    <!-- 雲の中のテキスト -->
-    <TextView
-        android:id="@+id/cloudText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/no_proverb_yet"
-        android:textSize="20sp"
-        android:textColor="@android:color/black"
-        app:layout_constraintTop_toTopOf="@id/cloudBackground"
-        app:layout_constraintBottom_toBottomOf="@id/cloudBackground"
-        app:layout_constraintStart_toStartOf="@id/cloudBackground"
-        app:layout_constraintEnd_toEndOf="@id/cloudBackground" />
+        <!-- 左マージン 10vw の位置にガイドラインを設定 -->
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_left"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="vertical"
+            app:layout_constraintGuide_percent="0.10" /> <!-- 画面幅の10%の位置 -->
 
-    <Button
-        android:id="@+id/get_button"
-        android:layout_width="320dp"
-        android:layout_height="100dp"
-        android:text="@string/get_proverb_button"
-        android:textSize="20sp"
-        android:textColor="@color/black"
-        android:backgroundTint="@color/lightOrange"
-        app:layout_constraintTop_toTopOf="@id/guideline_button_margin"
-        app:layout_constraintStart_toStartOf="@id/cloudBackground"
-        app:layout_constraintEnd_toEndOf="@+id/cloudBackground"
-        tools:ignore="MissingConstraints" />
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_button_margin"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.37" /> <!-- 雲の背景の下 + 5% の位置 -->
 
-    <TextView
-        android:id="@+id/proverb_list"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/proverb_list"
-        android:textSize="30sp"
-        android:textColor="@color/black"
-        app:layout_constraintTop_toTopOf="@id/guideline_list_margin"
-        app:layout_constraintStart_toStartOf="@id/get_button"/>
+        <androidx.constraintlayout.widget.Guideline
+            android:id="@+id/guideline_list_margin"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:orientation="horizontal"
+            app:layout_constraintGuide_percent="0.53"/> <!-- ボタンの下 + 5% の位置 -->
 
-    <!-- 格言一覧の背景 -->
-    <ImageView
-        android:id="@+id/listBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:contentDescription="@string/list_description"
-        android:src="@drawable/list_background"
-        app:layout_constraintTop_toBottomOf="@id/proverb_list"
-        app:layout_constraintStart_toStartOf="@id/guideline_left" />
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/header"
+            android:textSize="30sp"
+            android:textColor="@color/black"
+            app:layout_constraintStart_toStartOf="@id/guideline_left"
+            app:layout_constraintTop_toBottomOf="@id/guideline" /><!-- 画面高さの5%に合わせる -->
 
-    <!-- 未開放バッジ -->
-    <ImageView
-        android:id="@+id/unopened_badge_1"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:contentDescription="@string/unopened_badge_description"
-        android:src="@drawable/unopened_badge"
-        app:layout_constraintTop_toTopOf="@id/listBackground"
-        app:layout_constraintStart_toStartOf="@id/listBackground"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp" />
+        <!-- 雲の背景 -->
+        <ImageView
+            android:id="@+id/cloudBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/cloud_description"
+            android:src="@drawable/cloud_background"
+            app:layout_constraintTop_toBottomOf="@id/textView"
+            app:layout_constraintStart_toStartOf="@id/guideline_left" />
 
-    <ImageView
-        android:id="@+id/unopened_badge_2"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:contentDescription="@string/unopened_badge_description"
-        android:src="@drawable/unopened_badge"
-        app:layout_constraintTop_toTopOf="@id/listBackground"
-        app:layout_constraintStart_toEndOf="@id/unopened_badge_1"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp" />
+        <!-- 雲の中のテキスト -->
+        <TextView
+            android:id="@+id/cloudText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_proverb_yet"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            app:layout_constraintTop_toTopOf="@id/cloudBackground"
+            app:layout_constraintBottom_toBottomOf="@id/cloudBackground"
+            app:layout_constraintStart_toStartOf="@id/cloudBackground"
+            app:layout_constraintEnd_toEndOf="@id/cloudBackground" />
 
-    <ImageView
-        android:id="@+id/unopened_badge_3"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
-        android:contentDescription="@string/unopened_badge_description"
-        android:src="@drawable/unopened_badge"
-        app:layout_constraintTop_toTopOf="@id/listBackground"
-        app:layout_constraintStart_toEndOf="@id/unopened_badge_2"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="16dp" />
+        <Button
+            android:id="@+id/get_button"
+            android:layout_width="320dp"
+            android:layout_height="100dp"
+            android:text="@string/get_proverb_button"
+            android:textSize="20sp"
+            android:textColor="@color/black"
+            android:backgroundTint="@color/lightOrange"
+            app:layout_constraintTop_toTopOf="@id/guideline_button_margin"
+            app:layout_constraintStart_toStartOf="@id/cloudBackground"
+            app:layout_constraintEnd_toEndOf="@+id/cloudBackground"
+            tools:ignore="MissingConstraints" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <TextView
+            android:id="@+id/proverb_list"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/proverb_list"
+            android:textSize="30sp"
+            android:textColor="@color/black"
+            app:layout_constraintTop_toTopOf="@id/guideline_list_margin"
+            app:layout_constraintStart_toStartOf="@id/get_button"/>
+
+        <!-- 格言一覧の背景 -->
+        <ImageView
+            android:id="@+id/listBackground"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/list_description"
+            android:src="@drawable/list_background"
+            app:layout_constraintTop_toBottomOf="@id/proverb_list"
+            app:layout_constraintStart_toStartOf="@id/guideline_left" />
+
+        <!-- 未開放バッジ -->
+        <ImageView
+            android:id="@+id/unopened_badge_1"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/unopened_badge_description"
+            android:src="@drawable/unopened_badge"
+            app:layout_constraintTop_toTopOf="@id/listBackground"
+            app:layout_constraintStart_toStartOf="@id/listBackground"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
+            android:id="@+id/unopened_badge_2"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/unopened_badge_description"
+            android:src="@drawable/unopened_badge"
+            app:layout_constraintTop_toTopOf="@id/listBackground"
+            app:layout_constraintStart_toEndOf="@id/unopened_badge_1"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp" />
+
+        <ImageView
+            android:id="@+id/unopened_badge_3"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:contentDescription="@string/unopened_badge_description"
+            android:src="@drawable/unopened_badge"
+            app:layout_constraintTop_toTopOf="@id/listBackground"
+            app:layout_constraintStart_toEndOf="@id/unopened_badge_2"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</ScrollView>
