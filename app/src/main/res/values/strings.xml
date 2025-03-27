@@ -7,4 +7,6 @@
     <string name="proverb_list">格言一覧</string>
     <string name="list_description">格言一覧の背景</string>
     <string name="unopened_badge_description">未開放のバッジ</string>
+    <string name="popup_close_text">閉じる</string>
+    <string name="popup_test_text">テストテキスト</string>
 </resources>
