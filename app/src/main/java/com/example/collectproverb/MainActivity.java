@@ -1,12 +1,14 @@
 package com.example.collectproverb;
 
+import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,10 +52,34 @@ public class MainActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE); // タイトルを非表示
         dialog.setContentView(popupView);
 
+        // ウィンドウのレイアウトパラメータを取得
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(window.getAttributes());
+
+            // 画面の幅に対する割合でサイズを設定する
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            int width = (int) (displayMetrics.widthPixels * 0.9); // 画面幅の80%
+            layoutParams.width = width;
+
+            // 角の丸さを設定
+            float cornerRadius = getResources().getDimension(R.dimen.dialog_corner_radius);
+            window.setBackgroundDrawable(new GradientDrawable() {{
+                setShape(GradientDrawable.RECTANGLE);
+                setCornerRadius(cornerRadius);
+            }});
+
+            // 変更を適用
+            window.setAttributes(layoutParams);
+
+        }
+
         // ポップアップ内の要素にアクセス
-        TextView popupTextView = popupView.findViewById(R.id.popup_text);
+        //TextView popupTextView = popupView.findViewById(R.id.popup_text);
         // テキストを設定
-        popupTextView.setText("これはポップアップ内のテキストです。");
+        //popupTextView.setText("これはポップアップ内のテキストです。");
 
         // Close ボタンのOnClickListenerを設定
         Button closeButton = popupView.findViewById(R.id.close_button); // popupViewからfindViewByIdを行う
