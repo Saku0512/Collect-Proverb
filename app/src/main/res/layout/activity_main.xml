@@ -39,7 +39,6 @@
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.53"/> <!-- ボタンの下 + 5% の位置 -->
 
-
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -106,5 +105,38 @@
         app:layout_constraintTop_toBottomOf="@id/proverb_list"
         app:layout_constraintStart_toStartOf="@id/guideline_left" />
 
+    <!-- 未開放バッジ -->
+    <ImageView
+        android:id="@+id/unopened_badge_1"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/unopened_badge_description"
+        android:src="@drawable/unopened_badge"
+        app:layout_constraintTop_toTopOf="@id/listBackground"
+        app:layout_constraintStart_toStartOf="@id/listBackground"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <ImageView
+        android:id="@+id/unopened_badge_2"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/unopened_badge_description"
+        android:src="@drawable/unopened_badge"
+        app:layout_constraintTop_toTopOf="@id/listBackground"
+        app:layout_constraintStart_toEndOf="@id/unopened_badge_1"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
+
+    <ImageView
+        android:id="@+id/unopened_badge_3"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:contentDescription="@string/unopened_badge_description"
+        android:src="@drawable/unopened_badge"
+        app:layout_constraintTop_toTopOf="@id/listBackground"
+        app:layout_constraintStart_toEndOf="@id/unopened_badge_2"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
