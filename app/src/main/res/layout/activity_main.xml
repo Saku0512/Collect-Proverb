@@ -180,7 +180,92 @@
                         android:layout_marginStart="16dp"
                         android:layout_marginTop="16dp" />
 
-                    <!-- 必要に応じて追加のバッジを配置 -->
+                    <ImageView
+                        android:id="@+id/unopened_badge_5"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_6"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+                </LinearLayout>
+
+                <!-- 3行目 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_7"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_8"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_9"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+                </LinearLayout>
+
+                <!-- 4行目 -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_10"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_11"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
+                    <ImageView
+                        android:id="@+id/unopened_badge_12"
+                        android:layout_width="80dp"
+                        android:layout_height="80dp"
+                        android:contentDescription="@string/unopened_badge_description"
+                        android:src="@drawable/unopened_badge"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginTop="16dp" />
+
                 </LinearLayout>
 
             </LinearLayout>
