@@ -25,6 +25,13 @@
         android:orientation="vertical"
         app:layout_constraintGuide_percent="0.10" /> <!-- 画面幅の10%の位置 -->
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline_button_margin"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.37" /> <!-- 雲の背景の下 + 5% の位置 -->
+
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
@@ -50,12 +57,26 @@
         android:id="@+id/cloudText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/noproverbyet"
+        android:text="@string/no_proverb_yet"
         android:textSize="20sp"
         android:textColor="@android:color/black"
         app:layout_constraintTop_toTopOf="@id/cloudBackground"
         app:layout_constraintBottom_toBottomOf="@id/cloudBackground"
         app:layout_constraintStart_toStartOf="@id/cloudBackground"
         app:layout_constraintEnd_toEndOf="@id/cloudBackground" />
+
+    <Button
+        android:id="@+id/get_button"
+        android:layout_width="320dp"
+        android:layout_height="100dp"
+        android:text="@string/get_proverb_button"
+        android:textSize="20sp"
+        android:textColor="@color/black"
+        android:backgroundTint="@color/lightOrange"
+        app:layout_constraintTop_toTopOf="@id/guideline_button_margin"
+        app:layout_constraintStart_toStartOf="@id/cloudBackground"
+        app:layout_constraintEnd_toEndOf="@+id/cloudBackground"
+        tools:ignore="MissingConstraints" />
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

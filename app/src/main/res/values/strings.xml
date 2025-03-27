@@ -1,6 +1,7 @@
 <resources>
     <string name="app_name">Collect Proverb</string>
     <string name="header">今日の格言</string>
-    <string name="noproverbyet">まだ格言を取得していません</string>
+    <string name="no_proverb_yet">まだ格言を取得していません</string>
     <string name="cloud_description">背景の雲</string>
+    <string name="get_proverb_button">今日の格言を受け取る</string>
 </resources>
