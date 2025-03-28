@@ -14,13 +14,32 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/popup_text"
+            android:id="@+id/questionTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/popup_test_text"
             android:textSize="18sp"
             android:textColor="@android:color/black"
             android:layout_marginBottom="16dp"/>
+
+        <TextView
+            android:id="@+id/quoteTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="20sp"
+            android:textAlignment="center"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/quoteTextName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:textSize="20sp"
+            android:gravity="end"
+            android:layout_gravity="end"
+            android:visibility="gone" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,14 +57,36 @@
                 android:layout_gravity="end"/>
 
             <Button
-                android:id="@+id/next_button"
+                android:id="@+id/close_button_final"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/popup_next_text"
+                android:text="@string/popup_close_text"
                 android:backgroundTint="@color/lightOrange"
                 android:textColor="@android:color/black"
                 android:textSize="18sp"
-                android:layout_gravity="end"/>
+                android:layout_weight="1"
+                android:gravity="center"
+                android:visibility="gone"/>
+
+            <Button
+                android:id="@+id/buttonYes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/buttonYes"
+                android:backgroundTint="@color/lightOrange"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:layout_marginStart="40dp"/>
+
+            <Button
+                android:id="@+id/buttonNo"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/buttonNo"
+                android:backgroundTint="@color/lightOrange"
+                android:textColor="@android:color/black"
+                android:textSize="18sp"
+                android:layout_marginStart="20dp"/>
 
         </LinearLayout>
     </LinearLayout>

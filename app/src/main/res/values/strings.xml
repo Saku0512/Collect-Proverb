@@ -10,4 +10,6 @@
     <string name="popup_close_text">閉じる</string>
     <string name="popup_next_text">次へ</string>
     <string name="popup_test_text">テストテキスト</string>
+    <string name="buttonYes">Yes</string>
+    <string name="buttonNo">No</string>
 </resources>
