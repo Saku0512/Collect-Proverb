@@ -90,6 +90,9 @@ public class MainActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(popupView);
 
+        // ダイアログが外をタッチしても閉じないようにする
+        dialog.setCancelable(false);
+
         // UI要素
         TextView questionTextView = popupView.findViewById(R.id.questionTextView);
         TextView quoteTextView = popupView.findViewById(R.id.quoteTextView);
