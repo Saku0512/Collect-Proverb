@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         Button buttonYes = popupView.findViewById(R.id.buttonYes);
         Button buttonNo = popupView.findViewById(R.id.buttonNo);
         Button closeButton_final = popupView.findViewById(R.id.close_button_final);
-        Button closeButton = popupView.findViewById(R.id.close_button);
+        TextView closeButton = popupView.findViewById(R.id.close_button);
 
         // ウィンドウのレイアウトパラメータを取得
         Window window = dialog.getWindow();
@@ -207,7 +207,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 次の質問へ進む処理
-    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
+    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, TextView closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         questionIndex++;
         if (questionIndex < questions.length) {
             questionTextView.setText(questions[questionIndex]);
@@ -217,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 結果を表示する処理
-    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
+    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, TextView closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         String selectedQuote;
 
         if (score == 0) {
