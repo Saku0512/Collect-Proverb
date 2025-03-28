@@ -113,11 +113,11 @@ public class MainActivity extends AppCompatActivity {
 
             // "Yes"ボタンの左マージンを設定
             LinearLayout.LayoutParams ButtonYesParams = (LinearLayout.LayoutParams) buttonYes.getLayoutParams();
-            ButtonYesParams.setMargins((int) (width * 0.4), 0, 0, 0); // 左マージンを40%に設定
+            ButtonYesParams.setMargins((int) (width * 0.10), 0, 0, 0); // 左マージンを8%に設定
             buttonYes.setLayoutParams(ButtonYesParams);
 
             LinearLayout.LayoutParams ButtonNoParams = (LinearLayout.LayoutParams) buttonNo.getLayoutParams();
-            ButtonNoParams.setMargins((int) (width * 0.2), 0, 0, 0); // 左マージンを20%に設定
+            ButtonNoParams.setMargins((int) (width * 0.03), 0, 0, 0); // 左マージンを5%に設定
             buttonNo.setLayoutParams(ButtonNoParams);
 
             // 角の丸さを設定
