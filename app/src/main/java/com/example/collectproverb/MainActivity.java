@@ -1,5 +1,6 @@
 package com.example.collectproverb;
 
+import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
@@ -18,12 +19,15 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import org.w3c.dom.Text;
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
+    private static final String PREF_NAME = "ProverbAppPreferences";
+    private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"
     private int questionIndex = 0; // 現在の質問のインデックス
     private int score = 0; // Yesの回数をカウント
     private Random random;
@@ -48,12 +52,22 @@ public class MainActivity extends AppCompatActivity {
         TextView cloudText = findViewById(R.id.cloudText);
         TextView today_proverb = findViewById(R.id.today_proverb);
         TextView today_proverb_author = findViewById(R.id.today_proverb_author);
+
+        //checkButtonState(getButton);
+
+        // ボタンが押されたときの処理
         getButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showPopupDialog(cloudText, today_proverb, today_proverb_author); // ポップアップを表示
+                // ポップアップを表示
+                showPopupDialog(cloudText, today_proverb, today_proverb_author, getButton);
+
+                // ボタンが押された時点で現在の日付を保存
+                saveLastClickDate();
             }
         });
+
+
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
@@ -64,6 +78,41 @@ public class MainActivity extends AppCompatActivity {
         // 格言リストの初期化
         initializeQuotes();
     }
+
+    // ボタンが押された日付を保存する
+    private void saveLastClickDate() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        // 現在の日付の「日」部分のみを保存
+        String currentDay = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date());
+        editor.putString(PREF_LAST_CLICK_DATE, currentDay);
+        editor.apply();
+    }
+
+    // ボタンの有効化/無効化を設定
+    private void checkButtonState(Button getButton) {
+        // ボタンが押された日と現在の日付を比較
+        String savedDay = getSavedClickDate(); // 保存された日
+        String currentDay = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()); // 今日の日
+
+        if (savedDay.equals(currentDay)) {
+            // 今日押された場合
+            getButton.setEnabled(false); // ボタン無効化
+            getButton.setText("今日はもう押せません");
+        } else {
+            // 違う日付の場合
+            getButton.setEnabled(true); // ボタン有効化
+            getButton.setText("今日の格言を表示");
+        }
+    }
+
+    // 保存された日を取得する
+    private String getSavedClickDate() {
+        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
+        return sharedPreferences.getString(PREF_LAST_CLICK_DATE, "");
+    }
+
 
     // 格言リストを初期化する関数
     private void initializeQuotes() {
@@ -83,7 +132,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // ポップアップを表示する関数
-    private void showPopupDialog(TextView cloudText, TextView today_proverb, TextView today_proverb_author) {
+    private void showPopupDialog(TextView cloudText, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         LayoutInflater inflater = LayoutInflater.from(this);
         View popupView = inflater.inflate(R.layout.popup_layout, null);
         Dialog dialog = new Dialog(this);
@@ -142,12 +191,12 @@ public class MainActivity extends AppCompatActivity {
         // Yesボタンの処理
         buttonYes.setOnClickListener(view -> {
             score++;
-            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author);
+            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
         });
 
         // Noボタンの処理
         buttonNo.setOnClickListener(view -> {
-            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author);
+            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
         });
 
         // Closeボタンの処理
@@ -158,17 +207,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 次の質問へ進む処理
-    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author) {
+    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         questionIndex++;
         if (questionIndex < questions.length) {
             questionTextView.setText(questions[questionIndex]);
         } else {
-            displayResult(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author);
+            displayResult(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
         }
     }
 
     // 結果を表示する処理
-    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author) {
+    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, Button closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         String selectedQuote;
 
         if (score == 0) {
@@ -210,6 +259,8 @@ public class MainActivity extends AppCompatActivity {
             cloudText.setVisibility(View.GONE);
             today_proverb.setText(quoteFinal);
             today_proverb_author.setText("- " + authorFinal);
+            // ボタンの状態を更新
+            checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
         });
     }
