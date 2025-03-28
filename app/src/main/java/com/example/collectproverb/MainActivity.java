@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private int score = 0; // Yesの回数をカウント
     private Random random;
 
-    private String[] questions = {
+    private final String[] questions = {
             "最近疲れを感じていますか？",
             "やる気が出ないことが多いですか？",
             "リラックスする時間はとれていますか？"
@@ -178,8 +178,12 @@ public class MainActivity extends AppCompatActivity {
 
         // 格言と偉人名を分割
         String[] parts = selectedQuote.split(" - ", 2);
-        String quote = parts[0];
+        final String quoteOriginal = parts[0];
         String author = (parts.length > 1) ? parts[1] : "不明";
+
+        // 自動的に改行を入れる
+        String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
+        quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
 
         // UIを更新
         questionTextView.setVisibility(View.GONE);
@@ -187,17 +191,22 @@ public class MainActivity extends AppCompatActivity {
         buttonNo.setVisibility(View.GONE);
         closeButton.setVisibility(View.GONE);
         closeButton_final.setVisibility(View.VISIBLE);
-        quoteTextView.setText(quote);
+        quoteTextView.setText(quoteFormatted);
         quoteTextView.setVisibility(View.VISIBLE);
         quoteTextName.setText("- " + author);
         quoteTextName.setVisibility(View.VISIBLE);
+
+        // 変数をfinalにする
+        final String quoteFinal = quoteFormatted;
+        final String authorFinal = author;
+
 
         // Closeボタンの処理
         closeButton_final.setOnClickListener(view -> {
             //cloudText.setText(quote);  cloudText に格言をセット
             cloudText.setVisibility(View.GONE);
-            today_proverb.setText(quote);
-            today_proverb_author.setText("- " + author);
+            today_proverb.setText(quoteFinal);
+            today_proverb_author.setText("- " + authorFinal);
             dialog.dismiss(); // ポップアップを閉じる
         });
     }

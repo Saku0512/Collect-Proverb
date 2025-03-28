@@ -94,16 +94,16 @@
                 android:text=""
                 android:textSize="20sp"
                 android:textColor="@color/black"
-                android:layout_marginTop="20dp"/>
+                android:layout_marginTop="10dp"/>
 
             <TextView
                 android:id="@+id/today_proverb_author"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text=""
-                android:textSize="20sp"
+                android:textSize="15sp"
                 android:textColor="@color/black"
-                android:layout_marginTop="50dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginEnd="10dp"
                 android:layout_gravity="end" />
 
