@@ -52,10 +52,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertProverb(db, "追い続ける勇気があるのなら、全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3);
         insertProverb(db, "一番大事なことは、自分の心と直感に従う勇気を持つことだ。", "ウォルト・ディズニー", "positive", 4);
 
-        insertProverb(db, "どんなに暗い夜でも、朝は必ずやってくる。", "ハリエット・ビーチャー・ストウ", "encouragement", 1);
+        insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1);
         insertProverb(db, "上を向いている限り、絶対にいいことがある。", "三浦知良", "encouragement", 2);
         insertProverb(db, "いつかこの日さえも、楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3);
-        insertProverb(db, "笑われて、笑われて、つよくなる。", "太宰治", "encouragement", 4);
+        insertProverb(db, "不良とは、優しさの事ではないかしら。", "太宰治", "encouragement", 4);
 
         insertProverb(db, "休むことも大切だ。焦らなくていい。", "老子", "rest", 1);
         insertProverb(db, "休息なしに成長なし。", "レオナルド・ダ・ヴィンチ", "rest", 2);
