@@ -20,44 +20,36 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
-    private static final String PREF_NAME = "ProverbAppPreferences";
+    private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
     private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"
     private int questionIndex = 0; // 現在の質問のインデックス
     private int score = 0; // Yesの回数をカウント
-    private Random random;
     private DatabaseHelper databaseHelper; // SQLiteデータベースのヘルパークラス
 
+    // 質問リスト
     private final String[] questions = {
             "最近疲れを感じていますか？",
             "やる気が出ないことが多いですか？",
             "リラックスする時間はとれていますか？"
     };
 
-    private ArrayList<String> positiveQuotes;
-    private ArrayList<String> encouragementQuotes;
-    private ArrayList<String> restQuotes;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
-        setContentView(R.layout.activity_main);
+        EdgeToEdge.enable(this); // 画面に端から端までコンテンツを表示するための設定
+        setContentView(R.layout.activity_main); // activity_main.xmlを画面に設定
 
-        // DatabaseHelperのインスタンスを作成
+        // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
 
         Button getButton = findViewById(R.id.get_button);
         TextView cloudText = findViewById(R.id.cloudText);
         TextView today_proverb = findViewById(R.id.today_proverb);
         TextView today_proverb_author = findViewById(R.id.today_proverb_author);
-
-        //checkButtonState(getButton);
 
         // ボタンが押されたときの処理
         getButton.setOnClickListener(new View.OnClickListener() {
@@ -78,9 +70,6 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-
-        // 格言リストの初期化
-        initializeQuotes();
     }
 
     // ボタンが押された日付を保存する
@@ -115,30 +104,6 @@ public class MainActivity extends AppCompatActivity {
     private String getSavedClickDate() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         return sharedPreferences.getString(PREF_LAST_CLICK_DATE, "");
-    }
-
-
-    // 格言リストを初期化する関数
-    private void initializeQuotes() {
-        random = new Random();
-
-        positiveQuotes = new ArrayList<>();
-        positiveQuotes.add("成功する秘訣は、成功するまでやり続けることである。 - トーマス・エジソン");
-        positiveQuotes.add("行動しなければ何も変わらない。 - ベンジャミン・フランクリン");
-        positiveQuotes.add("追い続ける勇気があるのなら、全ての夢は必ず実現する。 - ウォルト・ディズニー");
-        positiveQuotes.add("一番大事なことは、自分の心と直感に従う勇気を持つことだ。 - ウォルト・ディズニー");
-
-        encouragementQuotes = new ArrayList<>();
-        encouragementQuotes.add("どんなに暗い夜でも、朝は必ずやってくる。 - ハリエット・ビーチャー・ストウ");
-        encouragementQuotes.add("上を向いている限り、絶対にいいことがある。 - 三浦知良");
-        encouragementQuotes.add("いつかこの日さえも、楽しく思い出すことがあるだろう。 - ウェルギリウス");
-        encouragementQuotes.add("笑われて、笑われて、つよくなる。 - 太宰治");
-
-        restQuotes = new ArrayList<>();
-        restQuotes.add("休むことも大切だ。焦らなくていい。 - 老子");
-        restQuotes.add("休息なしに成長なし。 - レオナルド・ダ・ヴィンチ");
-        restQuotes.add("明日が素晴らしい日だといけないから、うんと休息するのさ。 - スヌーピー");
-        restQuotes.add("疑う余地のない純粋の歓びの一つは、勤勉の後の休息である。 - イマヌエル・カント");
     }
 
     // ポップアップを表示する関数
