@@ -31,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private int questionIndex = 0; // 現在の質問のインデックス
     private int score = 0; // Yesの回数をカウント
     private Random random;
+    private DatabaseHelper databaseHelper; // SQLiteデータベースのヘルパークラス
 
     private final String[] questions = {
             "最近疲れを感じていますか？",
@@ -47,6 +48,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
+
+        // DatabaseHelperのインスタンスを作成
+        databaseHelper = new DatabaseHelper(this);
 
         Button getButton = findViewById(R.id.get_button);
         TextView cloudText = findViewById(R.id.cloudText);
@@ -227,11 +231,14 @@ public class MainActivity extends AppCompatActivity {
         String selectedQuote;
 
         if (score == 0) {
-            selectedQuote = positiveQuotes.get(random.nextInt(positiveQuotes.size()));
+            //selectedQuote = positiveQuotes.get(random.nextInt(positiveQuotes.size()));
+            selectedQuote = databaseHelper.getRandomProverbByType("positive");
         } else if (score == 1 || score == 2) {
-            selectedQuote = encouragementQuotes.get(random.nextInt(encouragementQuotes.size()));
+            //selectedQuote = encouragementQuotes.get(random.nextInt(encouragementQuotes.size()));
+            selectedQuote = databaseHelper.getRandomProverbByType("encouragement");
         } else {
-            selectedQuote = restQuotes.get(random.nextInt(restQuotes.size()));
+            //selectedQuote = restQuotes.get(random.nextInt(restQuotes.size()));
+            selectedQuote = databaseHelper.getRandomProverbByType("rest");
         }
 
         // 格言と偉人名を分割
