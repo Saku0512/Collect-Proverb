@@ -121,14 +121,20 @@ public class MainActivity extends AppCompatActivity {
         positiveQuotes = new ArrayList<>();
         positiveQuotes.add("成功する秘訣は、成功するまでやり続けることである。 - トーマス・エジソン");
         positiveQuotes.add("行動しなければ何も変わらない。 - ベンジャミン・フランクリン");
+        positiveQuotes.add("追い続ける勇気があるのなら、全ての夢は必ず実現する。 - ウォルト・ディズニー");
+        positiveQuotes.add("一番大事なことは、自分の心と直感に従う勇気を持つことだ。 - ウォルト・ディズニー");
 
         encouragementQuotes = new ArrayList<>();
         encouragementQuotes.add("どんなに暗い夜でも、朝は必ずやってくる。 - ハリエット・ビーチャー・ストウ");
-        encouragementQuotes.add("あなたは一人じゃない。 - アノニマス");
+        encouragementQuotes.add("上を向いている限り、絶対にいいことがある。 - 三浦知良");
+        encouragementQuotes.add("いつかこの日さえも、楽しく思い出すことがあるだろう。 - ウェルギリウス");
+        encouragementQuotes.add("笑われて、笑われて、つよくなる。 - 太宰治");
 
         restQuotes = new ArrayList<>();
         restQuotes.add("休むことも大切だ。焦らなくていい。 - 老子");
         restQuotes.add("休息なしに成長なし。 - レオナルド・ダ・ヴィンチ");
+        restQuotes.add("明日が素晴らしい日だといけないから、うんと休息するのさ。 - スヌーピー");
+        restQuotes.add("疑う余地のない純粋の歓びの一つは、勤勉の後の休息である。 - イマヌエル・カント");
     }
 
     // ポップアップを表示する関数
