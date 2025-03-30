@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     private static final String TABLE_NAME = "proverbs";
     private static final String COLUMN_ID = "id";
@@ -33,8 +33,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_SPEAKER + " TEXT, " +
                 COLUMN_TYPE + " TEXT NOT NULL, " +
                 COLUMN_TYPE_ID + " INTEGER NOT NULL, " +
-                COLUMN_DRAWABLE_PATH + "INTEGER NOT NULL," +
-                COLUMN_DRAWABLE_BOOl + "INTEGER NOT NULL," +
+                COLUMN_DRAWABLE_PATH + " INTEGER NOT NULL," +
+                COLUMN_DRAWABLE_BOOl + " INTEGER NOT NULL," +
                 COLUMN_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
                 COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
         db.execSQL(createTableQuery);
