@@ -1,14 +1,16 @@
 package com.example.collectproverb;
 
+import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String TABLE_NAME = "proverbs";
     private static final String COLUMN_ID = "id";
@@ -87,8 +89,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{type});
 
         if (cursor.moveToFirst()) {
-            String proverb = cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB));
-            String speaker = cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER));
+            @SuppressLint("Range") String proverb = cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB));
+            @SuppressLint("Range") String speaker = cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER));
             cursor.close();
             db.close();
             return proverb + " - " + speaker;
@@ -98,4 +100,77 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.close();
         return null;
     }
+
+    // 取得した格言のパスを取得するメソッド
+    public Integer getDrawablePathBySpeaker(String speaker) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+                        " WHERE speaker = ?",
+                new String[]{speaker});
+
+        if (cursor.moveToFirst()) {
+            @SuppressLint("Range") Integer drawable_path = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_PATH));
+            cursor.close();
+            db.close();
+            return drawable_path;
+        }
+
+        cursor.close();
+        db.close();
+        return null;
+    }
+
+    // 取得したパスのboolを変更するメソッド
+    public void toggleDrawableBoolByPath(int path) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        Cursor cursor = null;
+        int currentBoolValue = -1; // 初期値として -1 (不正な値) を設定
+
+        try {
+            // 現在の drawable_bool の値を取得
+            cursor = db.rawQuery("SELECT drawable_bool FROM " + TABLE_NAME + " WHERE drawable_path = ?",
+                    new String[]{String.valueOf(path)});
+
+            if (cursor.moveToFirst()) { // レコードが存在する場合
+                currentBoolValue = cursor.getInt(0); // drawable_bool の値を取得
+            }
+        } finally {
+            if (cursor != null) {
+                cursor.close(); // Cursor を閉じる
+            }
+        }
+
+        // 取得した値が 0 の場合のみ 1 に変更
+        if (currentBoolValue == 0) {
+            ContentValues values = new ContentValues();
+            values.put("drawable_bool", 1); // 0 → 1 に変更
+
+            int rowsAffected = db.update(TABLE_NAME, values, "drawable_path = ?",
+                    new String[]{String.valueOf(path)});
+
+            Log.d("DB_UPDATE", "Rows affected: " + rowsAffected);
+        } else {
+            Log.d("DB_UPDATE", "No update performed. Current value: " + currentBoolValue);
+        }
+
+        db.close(); // DB を閉じる
+    }
+
+    // idを取得するメソッド
+    public Integer getIdByPath(int path) {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        try (Cursor cursor = db.rawQuery("SELECT id FROM " + TABLE_NAME + " WHERE drawable_path = ?",
+                new String[]{String.valueOf(path)})) {
+            if (cursor.moveToFirst()) {
+                return cursor.getInt(0);
+            }
+        }
+        // Cursor を閉じる
+
+        db.close();
+        return null;
+
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.example.collectproverb;
 
+import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -45,6 +47,14 @@ public class MainActivity extends AppCompatActivity {
 
         // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
+
+        // 未開放バッジの ID リスト
+        int[] badgeIds = {
+                R.id.unopened_badge_1, R.id.unopened_badge_2, R.id.unopened_badge_3,
+                R.id.unopened_badge_4, R.id.unopened_badge_5, R.id.unopened_badge_6,
+                R.id.unopened_badge_7, R.id.unopened_badge_8, R.id.unopened_badge_9,
+                R.id.unopened_badge_10, R.id.unopened_badge_11, R.id.unopened_badge_12
+        };
 
         Button getButton = findViewById(R.id.get_button);
         TextView cloudText = findViewById(R.id.cloudText);
@@ -192,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 結果を表示する処理
+    @SuppressLint("SetTextI18n")
     private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, TextView closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         String selectedQuote;
 
@@ -240,6 +251,20 @@ public class MainActivity extends AppCompatActivity {
             // ボタンの状態を更新
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
+
+            // 格言のパスを取得
+            Integer drawable_path = databaseHelper.getDrawablePathBySpeaker(author);
+            // pathのbool値を変更
+            databaseHelper.toggleDrawableBoolByPath(drawable_path);
+            // idを取得
+            Integer id = databaseHelper.getIdByPath(drawable_path);
+            ImageView badge = findViewById(getResources().getIdentifier(
+                    "unopened_badge_" + id, // 例: "unopened_badge_5"
+                    "id",
+                    getPackageName()
+            ));
+            // badgeの画像を切り替え
+            badge.setImageResource(drawable_path);
         });
     }
 }
