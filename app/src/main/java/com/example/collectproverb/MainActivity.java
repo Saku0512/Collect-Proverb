@@ -48,14 +48,6 @@ public class MainActivity extends AppCompatActivity {
         // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
 
-        // 未開放バッジの ID リスト
-        int[] badgeIds = {
-                R.id.unopened_badge_1, R.id.unopened_badge_2, R.id.unopened_badge_3,
-                R.id.unopened_badge_4, R.id.unopened_badge_5, R.id.unopened_badge_6,
-                R.id.unopened_badge_7, R.id.unopened_badge_8, R.id.unopened_badge_9,
-                R.id.unopened_badge_10, R.id.unopened_badge_11, R.id.unopened_badge_12
-        };
-
         Button getButton = findViewById(R.id.get_button);
         TextView cloudText = findViewById(R.id.cloudText);
         TextView today_proverb = findViewById(R.id.today_proverb);
