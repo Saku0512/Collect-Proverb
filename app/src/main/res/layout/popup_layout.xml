@@ -58,7 +58,6 @@
             android:visibility="gone" />
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
@@ -78,6 +77,7 @@
                 app:layout_constraintEnd_toEndOf="parent"/>
 
             <LinearLayout
+                style="?android:attr/buttonBarStyle"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
@@ -88,6 +88,7 @@
 
                 <Button
                     android:id="@+id/buttonNo"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/buttonNo"
@@ -98,6 +99,7 @@
 
                 <Button
                     android:id="@+id/buttonYes"
+                    style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/buttonYes"
