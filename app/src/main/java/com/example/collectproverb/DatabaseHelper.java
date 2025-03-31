@@ -12,7 +12,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
     private static final int DATABASE_VERSION = 3;
 
-    private static final String TABLE_NAME = "proverbs";
+    private static final String Proverb_TABLE_NAME = "proverbs";
+    private static final String Button_Bool_Table_Name = "button_bool";
+    private static final Integer DefaultBool = 0;
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_PROVERB = "proverb";
     private static final String COLUMN_SPEAKER = "speaker";
@@ -20,6 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TYPE_ID = "type_id";
     private static final String COLUMN_DRAWABLE_PATH = "drawable_path";
     private static final String COLUMN_DRAWABLE_BOOl = "drawable_bool";
+    private static final String COLUMN_BUTTON_BOOL = "button_bool";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
 
@@ -29,7 +32,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        String createTableQuery = "CREATE TABLE " + TABLE_NAME + " (" +
+        String createProverbTableQuery = "CREATE TABLE " + Proverb_TABLE_NAME + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PROVERB + " TEXT NOT NULL, " +
                 COLUMN_SPEAKER + " TEXT, " +
@@ -39,20 +42,31 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_DRAWABLE_BOOl + " INTEGER NOT NULL," +
                 COLUMN_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
                 COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
-        db.execSQL(createTableQuery);
+        db.execSQL(createProverbTableQuery);
 
-        // 初期データを挿入
-        insertInitialData(db);
+        String createButtonBoolTableQuery = "CREATE TABLE " + Button_Bool_Table_Name + " (" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_BUTTON_BOOL + " INTEGER NOT NULL, " +
+                COLUMN_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
+                COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
+        db.execSQL(createButtonBoolTableQuery);
+
+        // Proverbの初期データを挿入
+        insertInitialProverbsData(db);
+        // BOOLの初期データを挿入
+        insertInitialBoolData(db);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_NAME);
-        onCreate(db);
+        if (newVersion > oldVersion) {
+            db.execSQL("DROP TABLE IF EXISTS " + Proverb_TABLE_NAME);
+            onCreate(db);
+        }
     }
 
     // 初期データを挿入するメソッド
-    private void insertInitialData(SQLiteDatabase db) {
+    private void insertInitialProverbsData(SQLiteDatabase db) {
         insertProverb(db, "成功する秘訣は、成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1, R.drawable.red_edison, 0);
         insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, R.drawable.red_benjamin, 0);
         insertProverb(db, "追い続ける勇気があるのなら、全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, R.drawable.red_disney, 0);
@@ -69,6 +83,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertProverb(db, "疑う余地のない純粋の歓びの一つは、勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, R.drawable.blue_kant, 0);
     }
 
+    // ボタンboolを挿入
+    private void insertInitialBoolData(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_BUTTON_BOOL, DefaultBool);
+        db.insert(Button_Bool_Table_Name, null, values);
+    }
+
     // 格言を挿入するメソッド
     private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int drawable_path, int drawable_bool) {
         ContentValues values = new ContentValues();
@@ -78,13 +99,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_TYPE_ID, typeId);
         values.put(COLUMN_DRAWABLE_PATH, drawable_path);
         values.put(COLUMN_DRAWABLE_BOOl, drawable_bool);
-        db.insert(TABLE_NAME, null, values);
+        db.insert(Proverb_TABLE_NAME, null, values);
     }
 
     // 指定されたタイプからランダムな格言を取得するメソッド
     public String getRandomProverbByType(String type) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+        Cursor cursor = db.rawQuery("SELECT * FROM " + Proverb_TABLE_NAME +
                         " WHERE type = ? ORDER BY RANDOM() LIMIT 1",
                 new String[]{type});
 
@@ -104,7 +125,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // 取得した格言のパスを取得するメソッド
     public Integer getDrawablePathBySpeaker(String speaker) {
         SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.rawQuery("SELECT * FROM " + TABLE_NAME +
+        Cursor cursor = db.rawQuery("SELECT * FROM " + Proverb_TABLE_NAME +
                         " WHERE speaker = ?",
                 new String[]{speaker});
 
@@ -128,7 +149,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         try {
             // 現在の drawable_bool の値を取得
-            cursor = db.rawQuery("SELECT drawable_bool FROM " + TABLE_NAME + " WHERE drawable_path = ?",
+            cursor = db.rawQuery("SELECT drawable_bool FROM " + Proverb_TABLE_NAME + " WHERE drawable_path = ?",
                     new String[]{String.valueOf(path)});
 
             if (cursor.moveToFirst()) { // レコードが存在する場合
@@ -145,7 +166,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             ContentValues values = new ContentValues();
             values.put("drawable_bool", 1); // 0 → 1 に変更
 
-            int rowsAffected = db.update(TABLE_NAME, values, "drawable_path = ?",
+            int rowsAffected = db.update(Proverb_TABLE_NAME, values, "drawable_path = ?",
                     new String[]{String.valueOf(path)});
 
             Log.d("DB_UPDATE", "Rows affected: " + rowsAffected);
@@ -160,7 +181,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Integer getIdByPath(int path) {
         SQLiteDatabase db = this.getReadableDatabase();
 
-        try (Cursor cursor = db.rawQuery("SELECT id FROM " + TABLE_NAME + " WHERE drawable_path = ?",
+        try (Cursor cursor = db.rawQuery("SELECT id FROM " + Proverb_TABLE_NAME + " WHERE drawable_path = ?",
                 new String[]{String.valueOf(path)})) {
             if (cursor.moveToFirst()) {
                 return cursor.getInt(0);
