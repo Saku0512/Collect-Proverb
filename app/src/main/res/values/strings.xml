@@ -13,4 +13,8 @@
     <string name="popup_test_text">テストテキスト</string>
     <string name="buttonYes">Yes</string>
     <string name="buttonNo">No</string>
+    <string name="popupImage">ポップアップイメージ</string>
+    <string name="popup_proverb_author">発言者: </string>
+    <string name="popup_proverb">格言</string>
+    <string name="popup_proverb_get_day">取得日: </string>
 </resources>
