@@ -2,6 +2,7 @@ package com.example.collectproverb;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
@@ -21,6 +22,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -31,6 +33,7 @@ public class MainActivity extends AppCompatActivity {
     private int questionIndex = 0; // 現在の質問のインデックス
     private int score = 0; // Yesの回数をカウント
     private DatabaseHelper databaseHelper; // SQLiteデータベースのヘルパークラス
+    private SQLiteDatabase db; // データベースオブジェクトをMainActivityのメンバ変数として保持
 
     // 質問リスト
     private final String[] questions = {
@@ -47,11 +50,14 @@ public class MainActivity extends AppCompatActivity {
 
         // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
+        db = databaseHelper.getWritableDatabase(); // MainActivityでデータベースを開く
 
         Button getButton = findViewById(R.id.get_button);
         TextView cloudText = findViewById(R.id.cloudText);
         TextView today_proverb = findViewById(R.id.today_proverb);
         TextView today_proverb_author = findViewById(R.id.today_proverb_author);
+
+        //checkButtonState(getButton);
 
         // ボタンが押されたときの処理
         getButton.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +80,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (db != null && db.isOpen()) {
+            db.close(); // MainActivityが破棄されるときにデータベースを閉じる
+        }
+    }
+
     // ボタンが押された日付を保存する
     private void saveLastClickDate() {
         SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
@@ -87,20 +101,41 @@ public class MainActivity extends AppCompatActivity {
 
     // ボタンの有効化/無効化を設定
     private void checkButtonState(Button getButton) {
+        SQLiteDatabase db = databaseHelper.getWritableDatabase(); // 書き込み用のデータベースを取得
         // ボタンが押された日と現在の日付を比較
-        String savedDay = getSavedClickDate(); // 保存された日
-        String currentDay = new SimpleDateFormat("dd", Locale.getDefault()).format(new Date()); // 今日の日
+        String savedDateTime = databaseHelper.getBoolUpdatedAt(); // yyyy-mm-dd hh:mm:ss
+        int ButtonBool = databaseHelper.getButtonBool();
+        String currentDay = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(new Date()); // 今日の日
 
-        if (savedDay.equals(currentDay)) {
+        String savedDay = extractDayFromDate(savedDateTime); // savedDateTimeからddを抽出
+        String currentDayOnly = extractDayFromDate(currentDay); // currentDayからddを抽出
+
+        if (savedDay.equals(currentDayOnly) && (ButtonBool == 0)) {
             // 今日押された場合
             getButton.setEnabled(false); // ボタン無効化
             getButton.setText("今日はもう押せません");
+            databaseHelper.FalseButtonBool(db);
         } else {
             // 違う日付の場合
             getButton.setEnabled(true); // ボタン有効化
             getButton.setText("今日の格言を表示");
+            databaseHelper.EnableButtonBool(db);
         }
     }
+
+    private String extractDayFromDate(String dateTime) {
+        try {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault());
+            Date date = inputFormat.parse(dateTime);
+
+            SimpleDateFormat outputFormat = new SimpleDateFormat("dd", Locale.getDefault());
+            return outputFormat.format(date); // `dd` のみを返す
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return null; // 変換失敗時は null
+        }
+    }
+
 
     // 保存された日を取得する
     private String getSavedClickDate() {
@@ -237,9 +272,6 @@ public class MainActivity extends AppCompatActivity {
             cloudText.setVisibility(View.GONE);
             today_proverb.setText(quoteFinal);
             today_proverb_author.setText("- " + authorFinal);
-            // ボタンの状態を更新
-            checkButtonState(getButton);
-            dialog.dismiss(); // ポップアップを閉じる
 
             // 格言のパスを取得
             Integer drawable_path = databaseHelper.getDrawablePathBySpeaker(author);
@@ -252,6 +284,21 @@ public class MainActivity extends AppCompatActivity {
                     "id",
                     getPackageName()
             ));
+            //DB更新
+            SQLiteDatabase db = databaseHelper.getWritableDatabase();
+            db.beginTransaction();
+            try {
+                databaseHelper.FalseButtonBool(db);
+                db.setTransactionSuccessful(); // 成功した場合のみコミット
+            } catch (Exception e) {
+                e.printStackTrace(); // エラー内容をログに出力
+            } finally {
+                db.endTransaction(); // トランザクション終了
+                //db.close(); // データベース閉じる
+            }
+            // ボタンの状態を更新
+            checkButtonState(getButton);
+            dialog.dismiss(); // ポップアップを閉じる
             // badgeの画像を切り替え
             badge.setImageResource(drawable_path);
         });

@@ -10,11 +10,11 @@ import android.util.Log;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 3;
-
+    private static final int DATABASE_VERSION = 13;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
-    private static final Integer DefaultBool = 0;
+    private static final Integer FalseBool = 0;
+    private static final Integer EnableBool = 1;
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_PROVERB = "proverb";
     private static final String COLUMN_SPEAKER = "speaker";
@@ -22,7 +22,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_TYPE_ID = "type_id";
     private static final String COLUMN_DRAWABLE_PATH = "drawable_path";
     private static final String COLUMN_DRAWABLE_BOOl = "drawable_bool";
-    private static final String COLUMN_BUTTON_BOOL = "button_bool";
+    private static final String COLUMN_BUTTON_BOOL = "bool";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
 
@@ -40,15 +40,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_TYPE_ID + " INTEGER NOT NULL, " +
                 COLUMN_DRAWABLE_PATH + " INTEGER NOT NULL," +
                 COLUMN_DRAWABLE_BOOl + " INTEGER NOT NULL," +
-                COLUMN_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
+                COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
+                COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createProverbTableQuery);
 
         String createButtonBoolTableQuery = "CREATE TABLE " + Button_Bool_Table_Name + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_BUTTON_BOOL + " INTEGER NOT NULL, " +
-                COLUMN_CREATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP, " +
-                COLUMN_UPDATED_AT + " DATETIME DEFAULT CURRENT_TIMESTAMP)";
+                COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
+                COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createButtonBoolTableQuery);
 
         // Proverbの初期データを挿入
@@ -59,11 +59,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        if (newVersion > oldVersion) {
-            db.execSQL("DROP TABLE IF EXISTS " + Proverb_TABLE_NAME);
-            onCreate(db);
-        }
+        // 古いテーブルを削除
+        db.execSQL("DROP TABLE IF EXISTS " + Proverb_TABLE_NAME);
+        db.execSQL("DROP TABLE IF EXISTS " + Button_Bool_Table_Name);
+
+        // テーブル再作成
+        onCreate(db);
     }
+
 
     // 初期データを挿入するメソッド
     private void insertInitialProverbsData(SQLiteDatabase db) {
@@ -86,9 +89,66 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // ボタンboolを挿入
     private void insertInitialBoolData(SQLiteDatabase db) {
         ContentValues values = new ContentValues();
-        values.put(COLUMN_BUTTON_BOOL, DefaultBool);
+        values.put(COLUMN_BUTTON_BOOL, EnableBool);
         db.insert(Button_Bool_Table_Name, null, values);
     }
+
+    //ボタンboolを変更(有効化)
+    public void EnableButtonBool(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_BUTTON_BOOL, EnableBool);
+        db.update(Button_Bool_Table_Name, values, null, null);
+    }
+
+    //ボタンboolを変更(無効化)
+    public void FalseButtonBool(SQLiteDatabase db) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_BUTTON_BOOL, FalseBool);
+        db.update(Button_Bool_Table_Name, values, null, null);
+    }
+
+    //ボタンboolを取得するメソッド
+    public int getButtonBool() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        int buttonBool = -1; // 初期値 (-1: 取得失敗時の値)
+
+        // クエリを実行
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_BUTTON_BOOL + " FROM " + Button_Bool_Table_Name, null);
+
+        // データが存在すれば取得
+        if (cursor.moveToFirst()) {
+            buttonBool = cursor.getInt(0); // 0番目のカラム (COLUMN_BUTTON_BOOL) の値を取得
+        }
+
+        cursor.close(); // カーソルを閉じる
+
+        return buttonBool; // 取得した値を返す
+    }
+
+    //ボタンboolのupdated_atを取得するメソッド
+    @SuppressLint("Range")
+    public String getBoolUpdatedAt() {
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+        String rawDate = null;
+
+        try {
+            cursor = db.rawQuery("SELECT " + COLUMN_UPDATED_AT + " FROM " + Button_Bool_Table_Name, null);
+
+            if (cursor.moveToFirst()) {
+                // 日付文字列を取得
+                rawDate = cursor.getString(cursor.getColumnIndex(COLUMN_UPDATED_AT));
+            }
+        } finally {
+            // リソース解放を確実に実行
+            if (cursor != null) cursor.close();
+            //db.close();
+        }
+
+        // 日付加工処理（3つの方法から選択）
+        return rawDate;
+    }
+
 
     // 格言を挿入するメソッド
     private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int drawable_path, int drawable_bool) {
@@ -118,7 +178,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        db.close();
         return null;
     }
 
@@ -137,7 +196,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         cursor.close();
-        db.close();
         return null;
     }
 
@@ -174,7 +232,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             Log.d("DB_UPDATE", "No update performed. Current value: " + currentBoolValue);
         }
 
-        db.close(); // DB を閉じる
+        //db.close(); // DB を閉じる
     }
 
     // idを取得するメソッド
@@ -189,7 +247,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
         // Cursor を閉じる
 
-        db.close();
+        //db.close();
         return null;
 
     }
