@@ -3,6 +3,7 @@ package com.example.collectproverb;
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
@@ -30,6 +31,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
@@ -112,23 +114,48 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    private final Map<Integer, Boolean> badgeStates = new HashMap<>(); // バッジの状態を管理
+
     private void setupBadgeClickListeners() {
+        // バッジの状態を初期化（例: true=有効, false=未開放）
+        for (int i = 1; i <= 12; i++) {
+            badgeStates.put(i, false); // 初期状態はすべて未開放
+        }
+
+        // 特定のバッジを有効化（例: バッジ1とバッジ5を有効化）
+        //badgeStates.put(1, true);
+        //badgeStates.put(5, true);
+        ArrayMap<Integer, Object> data = databaseHelper.getAllIdAndBool();
+        // データベースの値で上書き
+        for (Map.Entry<Integer, Object> entry : data.entrySet()) {
+            int id = entry.getKey();
+            boolean state = (Boolean) entry.getValue();
+
+            // idが1〜12の範囲かチェック
+            if (id >= 1 && id <= 12) {
+                badgeStates.put(id, state);
+            }
+        }
+
+
         for (int i = 1; i <= 12; i++) { // バッジのIDが1～12まであると仮定
             String badgeId = "unopened_badge_" + i; // ID文字列を生成
             int resId = getResources().getIdentifier(badgeId, "id", getPackageName()); // IDリソースを取得
 
             ImageView badge = findViewById(resId); // ImageViewを取得
             if (badge != null) { // バッジが存在する場合のみ処理
+                int badgeNumber = i; // 現在のバッジ番号を保持
                 badge.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        // IDの数字部分を取得
-                        String fullIdName = getResources().getResourceEntryName(v.getId()); // 完全なID名を取得
-                        String numberPart = fullIdName.replace("unopened_badge_", ""); // "unopened_badge_" を削除して数字部分を抽出
+                        // バッジが未開放の場合は処理を中断
+                        if (!badgeStates.get(badgeNumber)) { // 状態がfalseなら未開放
+                            Log.d("BadgeClick", "Badge " + badgeNumber + " is unopened. No action taken.");
+                            return; // 処理を中断
+                        }
 
-                        Log.d("BadgeClick", "Clicked Badge ID: " + numberPart); // デバッグログに出力
+                        Log.d("BadgeClick", "Clicked Badge ID: " + badgeNumber); // デバッグログに出力
 
-                        int badgeNumber = Integer.parseInt(numberPart); // 数字部分を整数に変換
                         handleBadgeClick(badgeNumber); // クリックされたバッジ番号で処理を実行
                     }
                 });

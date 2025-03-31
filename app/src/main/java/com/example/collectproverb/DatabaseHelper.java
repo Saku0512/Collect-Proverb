@@ -348,4 +348,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return resultMap; // 結果を返す
     }
 
+    // proverbsテーブルのidとdrawable_boolを全て取得するメソッド
+    public ArrayMap<Integer, Object> getAllIdAndBool() {
+        ArrayMap<Integer, Object> resultMap = new ArrayMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            // クエリ実行：idとdrawable_bool列を取得
+            cursor = db.rawQuery("SELECT id, " + COLUMN_DRAWABLE_BOOl + " FROM " + Proverb_TABLE_NAME, null);
+
+            // 結果をArrayMapに追加
+            if (cursor.moveToFirst()) {
+                do {
+                    // 各行のデータを取得
+                    @SuppressLint("Range") int id = cursor.getInt(cursor.getColumnIndex("id")); // id列の値を取得
+                    @SuppressLint("Range") int drawableBool = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_BOOl)); // drawable_bool列の値を取得
+
+                    // drawable_boolが1ならtrue、0ならfalseに変換
+                    boolean boolValue = drawableBool == 1;
+
+                    // idをキー、boolValueを値として追加
+                    resultMap.put(id, boolValue);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            // リソース解放
+            if (cursor != null) cursor.close();
+        }
+
+        return resultMap; // 結果を返す
+    }
+
+
 }
