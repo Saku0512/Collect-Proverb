@@ -8,6 +8,11 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
     private static final int DATABASE_VERSION = 13;
@@ -250,6 +255,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         //db.close();
         return null;
 
+    }
+
+    // drawable_boolを取得する
+    public Map<String, int[]> getAllIdAndDrawablePathByDrawableBool() {
+        ArrayList<Integer> idList = new ArrayList<>();
+        ArrayList<Integer> drawablePathList = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            // クエリ実行
+            cursor = db.rawQuery("SELECT id, drawable_path FROM " + Proverb_TABLE_NAME + " WHERE drawable_bool = 1", null);
+
+            // 結果をリストに追加
+            if (cursor.moveToFirst()) {
+                do {
+                    @SuppressLint("Range") int id = cursor.getInt(cursor.getColumnIndex("id"));
+                    @SuppressLint("Range") int drawablePath = cursor.getInt(cursor.getColumnIndex("drawable_path"));
+
+                    idList.add(id);
+                    drawablePathList.add(drawablePath);
+                } while (cursor.moveToNext());
+            }
+        } finally {
+            // リソース解放
+            if (cursor != null) cursor.close();
+        }
+
+        // ArrayListをint配列に変換
+        int[] idArray = new int[idList.size()];
+        for (int i = 0; i < idList.size(); i++) {
+            idArray[i] = idList.get(i);
+        }
+
+        int[] drawablePathArray = new int[drawablePathList.size()];
+        for (int i = 0; i < drawablePathList.size(); i++) {
+            drawablePathArray[i] = drawablePathList.get(i);
+        }
+
+        // 結果をMapに格納して返す
+        Map<String, int[]> resultMap = new HashMap<>();
+        resultMap.put("id", idArray);
+        resultMap.put("drawable_path", drawablePathArray);
+
+        return resultMap;
     }
 
 }

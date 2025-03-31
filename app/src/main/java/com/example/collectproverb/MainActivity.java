@@ -7,6 +7,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
@@ -26,6 +27,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
@@ -56,6 +59,32 @@ public class MainActivity extends AppCompatActivity {
         TextView cloudText = findViewById(R.id.cloudText);
         TextView today_proverb = findViewById(R.id.today_proverb);
         TextView today_proverb_author = findViewById(R.id.today_proverb_author);
+
+        Map<String, int[]> resultMap = databaseHelper.getAllIdAndDrawablePathByDrawableBool();
+
+        int[] ids = resultMap.get("id");
+        int[] drawable_paths = resultMap.get("drawable_path");
+
+// idsとdrawable_pathsの対応する画像を切り替える処理
+        for (int i = 0; i < Objects.requireNonNull(ids).length; i++) {
+            int id = ids[i]; // 現在のid
+            assert drawable_paths != null;
+            int drawablePath = drawable_paths[i]; // 対応するdrawable_path
+
+            // ImageViewを取得
+            ImageView badge = findViewById(getResources().getIdentifier(
+                    "unopened_badge_" + id, // 例: "unopened_badge_5"
+                    "id",
+                    getPackageName()
+            ));
+
+            if (badge != null) { // ImageViewが存在する場合のみ処理を行う
+                badge.setImageResource(drawablePath); // drawable_pathに対応する画像に切り替え
+            } else {
+                Log.e("ImageViewError", "ImageView with id unopened_badge_" + id + " not found.");
+            }
+        }
+
 
         //checkButtonState(getButton);
 
