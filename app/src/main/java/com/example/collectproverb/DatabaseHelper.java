@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
@@ -300,6 +301,51 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         resultMap.put("drawable_path", drawablePathArray);
 
         return resultMap;
+    }
+
+    public ArrayMap<String, Object> getAllById(int id) {
+        ArrayMap<String, Object> resultMap = new ArrayMap<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = null;
+
+        try {
+            // クエリ実行：指定されたIDに一致する列を取得
+            cursor = db.rawQuery("SELECT * FROM " + Proverb_TABLE_NAME + " WHERE id = ?", new String[]{String.valueOf(id)});
+
+            // 結果をArrayMapに追加
+            if (cursor.moveToFirst()) {
+                // カラム数分ループしてデータを取得
+                for (int i = 0; i < cursor.getColumnCount(); i++) {
+                    String columnName = cursor.getColumnName(i); // カラム名取得
+                    Object value;
+
+                    // カラムの型に応じて値を取得
+                    switch (cursor.getType(i)) {
+                        case Cursor.FIELD_TYPE_INTEGER:
+                            value = cursor.getInt(i);
+                            break;
+                        case Cursor.FIELD_TYPE_FLOAT:
+                            value = cursor.getFloat(i);
+                            break;
+                        case Cursor.FIELD_TYPE_STRING:
+                            value = cursor.getString(i);
+                            break;
+                        case Cursor.FIELD_TYPE_BLOB:
+                            value = cursor.getBlob(i);
+                            break;
+                        default:
+                            value = null;
+                    }
+
+                    resultMap.put(columnName, value); // カラム名をキー、値をバリューとして追加
+                }
+            }
+        } finally {
+            // リソース解放
+            if (cursor != null) cursor.close();
+        }
+
+        return resultMap; // 結果を返す
     }
 
 }

@@ -6,6 +6,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
+import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -100,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // 画像が押された時の処理
+        setupBadgeClickListeners();
 
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
@@ -107,6 +110,85 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+    }
+
+    private void setupBadgeClickListeners() {
+        for (int i = 1; i <= 12; i++) { // バッジのIDが1～12まであると仮定
+            String badgeId = "unopened_badge_" + i; // ID文字列を生成
+            int resId = getResources().getIdentifier(badgeId, "id", getPackageName()); // IDリソースを取得
+
+            ImageView badge = findViewById(resId); // ImageViewを取得
+            if (badge != null) { // バッジが存在する場合のみ処理
+                badge.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // IDの数字部分を取得
+                        String fullIdName = getResources().getResourceEntryName(v.getId()); // 完全なID名を取得
+                        String numberPart = fullIdName.replace("unopened_badge_", ""); // "unopened_badge_" を削除して数字部分を抽出
+
+                        Log.d("BadgeClick", "Clicked Badge ID: " + numberPart); // デバッグログに出力
+
+                        int badgeNumber = Integer.parseInt(numberPart); // 数字部分を整数に変換
+                        handleBadgeClick(badgeNumber); // クリックされたバッジ番号で処理を実行
+                    }
+                });
+            }
+        }
+    }
+
+    private void handleBadgeClick(int badgeNumber) {
+        // badgeNumberでDB検索してデータを取得
+        ArrayMap<String, Object> data = databaseHelper.getAllById(badgeNumber);
+
+        // ポップアップ準備
+        LayoutInflater inflater = LayoutInflater.from(this);
+        View popupView = inflater.inflate(R.layout.badge_popup, null);
+        Dialog dialog = new Dialog(this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(popupView);
+
+        // ダイアログが外をタッチしても閉じないようにする
+        dialog.setCancelable(false);
+
+        // UI要素
+        ImageView imageView = popupView.findViewById(R.id.popup_image);
+        TextView popup_author = popupView.findViewById(R.id.popup_proverb_author);
+        TextView popup_proverb_content = popupView.findViewById(R.id.popup_proverb_content);
+        TextView popup_get_day = popupView.findViewById(R.id.popup_get_day);
+        TextView closeButton = popupView.findViewById(R.id.close_button);
+
+        imageView.setImageResource((Integer) data.get("drawable_path"));
+        popup_author.setText((String) data.get("speaker"));
+        popup_proverb_content.setText((String) data.get("proverb"));
+        popup_get_day.setText((String) data.get("created_at"));
+
+        // ウィンドウのレイアウトパラメータを取得
+        Window window = dialog.getWindow();
+        if (window != null) {
+            WindowManager.LayoutParams layoutParams = new WindowManager.LayoutParams();
+            layoutParams.copyFrom(window.getAttributes());
+
+            // 画面の幅に対する割合でサイズを設定する
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+            // 画面幅の90%
+            layoutParams.width = (int) (displayMetrics.widthPixels * 0.9);
+            // 角の丸さを設定
+            float cornerRadius = getResources().getDimension(R.dimen.dialog_corner_radius);
+            window.setBackgroundDrawable(new GradientDrawable() {{
+                setShape(GradientDrawable.RECTANGLE);
+                setCornerRadius(cornerRadius);
+            }});
+
+            // 変更を適用
+            window.setAttributes(layoutParams);
+        }
+
+        // Closeボタンの処理
+        closeButton.setOnClickListener(view -> dialog.dismiss());
+
+        // ポップアップを表示
+        dialog.show();
     }
 
     @Override
