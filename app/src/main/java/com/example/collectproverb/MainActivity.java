@@ -137,16 +137,16 @@ public class MainActivity extends AppCompatActivity {
             // 画面の幅に対する割合でサイズを設定する
             DisplayMetrics displayMetrics = new DisplayMetrics();
             getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
-            int width = (int) (displayMetrics.widthPixels * 0.9); // 画面幅の80%
+            int width = (int) (displayMetrics.widthPixels * 0.9); // 画面幅の90%
             layoutParams.width = width;
 
             // "Yes"ボタンの左マージンを設定
             LinearLayout.LayoutParams ButtonYesParams = (LinearLayout.LayoutParams) buttonYes.getLayoutParams();
-            ButtonYesParams.setMargins((int) (width * 0.10), 0, 0, 0); // 左マージンを8%に設定
+            ButtonYesParams.setMargins((int) (width * 0.10), 0, 0, 0); // 左マージンを10%に設定
             buttonYes.setLayoutParams(ButtonYesParams);
 
             LinearLayout.LayoutParams ButtonNoParams = (LinearLayout.LayoutParams) buttonNo.getLayoutParams();
-            ButtonNoParams.setMargins((int) (width * 0.03), 0, 0, 0); // 左マージンを5%に設定
+            ButtonNoParams.setMargins((int) (width * 0.03), 0, 0, 0); // 左マージンを3%に設定
             buttonNo.setLayoutParams(ButtonNoParams);
 
             // 角の丸さを設定
@@ -199,13 +199,10 @@ public class MainActivity extends AppCompatActivity {
         String selectedQuote;
 
         if (score == 0) {
-            //selectedQuote = positiveQuotes.get(random.nextInt(positiveQuotes.size()));
             selectedQuote = databaseHelper.getRandomProverbByType("positive");
         } else if (score == 1 || score == 2) {
-            //selectedQuote = encouragementQuotes.get(random.nextInt(encouragementQuotes.size()));
             selectedQuote = databaseHelper.getRandomProverbByType("encouragement");
         } else {
-            //selectedQuote = restQuotes.get(random.nextInt(restQuotes.size()));
             selectedQuote = databaseHelper.getRandomProverbByType("rest");
         }
 
