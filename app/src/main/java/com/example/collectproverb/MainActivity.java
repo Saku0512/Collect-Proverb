@@ -122,9 +122,7 @@ public class MainActivity extends AppCompatActivity {
             badgeStates.put(i, false); // 初期状態はすべて未開放
         }
 
-        // 特定のバッジを有効化（例: バッジ1とバッジ5を有効化）
-        //badgeStates.put(1, true);
-        //badgeStates.put(5, true);
+        //DBで有効化されたバッジを格納
         ArrayMap<Integer, Object> data = databaseHelper.getAllIdAndBool();
         // データベースの値で上書き
         for (Map.Entry<Integer, Object> entry : data.entrySet()) {
@@ -434,6 +432,7 @@ public class MainActivity extends AppCompatActivity {
                 db.endTransaction(); // トランザクション終了
                 //db.close(); // データベース閉じる
             }
+            setupBadgeClickListeners();
             // ボタンの状態を更新
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
