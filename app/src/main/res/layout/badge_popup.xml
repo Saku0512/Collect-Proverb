@@ -88,5 +88,27 @@
                 android:text=""
                 android:textSize="20sp"/>
         </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_horizontal"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:id="@+id/popup_count_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/popup_proverb_count"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/popup_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="20sp" />
+
+        </LinearLayout>
     </LinearLayout>
 </androidx.cardview.widget.CardView>
