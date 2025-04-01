@@ -9,9 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.camera2.CameraExtensionSession;
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.PrimitiveIterator;
 
@@ -19,7 +22,7 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 20;
+    private static final int DATABASE_VERSION = 21;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
@@ -437,7 +440,21 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             firstGetTime = cursor.getString(0);
         }
         cursor.close(); // カーソルを閉じる
-        db.close();     // データベースを閉じる
+
+        // 日付を整形
+        if (firstGetTime != null) {
+            try {
+                // yyyy-MM-dd HH:mm:ss形式のSimpleDateFormat（入力フォーマット）
+                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                // yyyy年MM月dd日形式のSimpleDateFormat（出力フォーマット）
+                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
+
+                // 日付文字列をDate型に変換し、再フォーマット
+                firstGetTime = outputFormat.format(inputFormat.parse(firstGetTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
 
         return firstGetTime; // 値を返す（nullの場合もあり得る）
     }
