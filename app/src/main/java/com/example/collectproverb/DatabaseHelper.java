@@ -9,9 +9,12 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.hardware.camera2.CameraExtensionSession;
 import android.util.Log;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.PrimitiveIterator;
 
@@ -19,7 +22,7 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 19;
+    private static final int DATABASE_VERSION = 21;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
@@ -35,6 +38,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_DRAWABLE_PATH = "drawable_path";
     private static final String COLUMN_DRAWABLE_BOOl = "drawable_bool";
     private static final String COLUMN_BUTTON_BOOL = "bool";
+    private static final String COLUMN_FIRST_GET_TIME = "first_get_time";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
 
@@ -53,6 +57,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_COUNT + " INTEGER NOT NULL, " +
                 COLUMN_DRAWABLE_PATH + " INTEGER NOT NULL," +
                 COLUMN_DRAWABLE_BOOl + " INTEGER NOT NULL," +
+                COLUMN_FIRST_GET_TIME + " TEXT NOT NULL," +
                 COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
                 COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createProverbTableQuery);
@@ -107,20 +112,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // 初期データを挿入するメソッド
     private void insertInitialProverbsData(SQLiteDatabase db) {
-        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0);
-        insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0);
-        insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0);
-        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0);
+        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0, "yet");
+        insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0, "yet");
+        insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0, "yet");
+        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0, "yes");
 
-        insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0);
-        insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0);
-        insertProverb(db, "いつかこの日さえも、\n楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0);
-        insertProverb(db, "不良とは、\n優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0);
+        insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0, "yet");
+        insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0, "yet");
+        insertProverb(db, "いつかこの日さえも、\n楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0, "yet");
+        insertProverb(db, "不良とは、\n優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0, "yet");
 
-        insertProverb(db, "ことしは、\n計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0);
-        insertProverb(db, "もっと早く終わるように、\n少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0);
-        insertProverb(db, "明日が素晴らしい日だといけないから、\nうんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0);
-        insertProverb(db, "疑う余地のない純粋の歓びの一つは、\n勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0);
+        insertProverb(db, "ことしは、\n計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0, "yet");
+        insertProverb(db, "もっと早く終わるように、\n少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0, "yet");
+        insertProverb(db, "明日が素晴らしい日だといけないから、\nうんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0, "yet");
+        insertProverb(db, "疑う余地のない純粋の歓びの一つは、\n勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0, "yet");
     }
 
     // ボタンboolを挿入
@@ -194,7 +199,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             // リソース解放を確実に実行
             if (cursor != null) cursor.close();
-            //db.close();
         }
 
         // 日付加工処理（3つの方法から選択）
@@ -203,7 +207,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     // 格言を挿入するメソッド
-    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool) {
+    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool, String first_get_time) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVERB, proverb);
         values.put(COLUMN_SPEAKER, speaker);
@@ -212,6 +216,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_COUNT, count);
         values.put(COLUMN_DRAWABLE_PATH, drawable_path);
         values.put(COLUMN_DRAWABLE_BOOl, drawable_bool);
+        values.put(COLUMN_FIRST_GET_TIME, first_get_time);
         db.insert(Proverb_TABLE_NAME, null, values);
     }
 
@@ -226,7 +231,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             @SuppressLint("Range") String proverb = cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB));
             @SuppressLint("Range") String speaker = cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER));
             cursor.close();
-            db.close();
             return proverb + " - " + speaker;
         }
 
@@ -244,7 +248,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") Integer drawable_path = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_PATH));
             cursor.close();
-            db.close();
             return drawable_path;
         }
 
@@ -284,8 +287,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             Log.d("DB_UPDATE", "No update performed. Current value: " + currentBoolValue);
         }
-
-        //db.close(); // DB を閉じる
     }
 
     // idを取得するメソッド
@@ -298,9 +299,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return cursor.getInt(0);
             }
         }
-        // Cursor を閉じる
-
-        //db.close();
         return null;
 
     }
@@ -425,6 +423,49 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
 
         return resultMap; // 結果を返す
+    }
+
+    // 初回取得日を取得
+    public String getFirstTime(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String firstGetTime = null;
+
+        // SQLクエリを実行して COLUMN_FIRST_GET_TIME を取得
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_FIRST_GET_TIME +
+                        " FROM " + Proverb_TABLE_NAME +
+                        " WHERE id = ?",
+                new String[]{String.valueOf(id)});
+        if (cursor.moveToFirst()) {
+            // COLUMN_FIRST_GET_TIME の値を取得
+            firstGetTime = cursor.getString(0);
+        }
+        cursor.close(); // カーソルを閉じる
+
+        // 日付を整形
+        if (firstGetTime != null) {
+            try {
+                // yyyy-MM-dd HH:mm:ss形式のSimpleDateFormat（入力フォーマット）
+                SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+                // yyyy年MM月dd日形式のSimpleDateFormat（出力フォーマット）
+                SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
+
+                // 日付文字列をDate型に変換し、再フォーマット
+                firstGetTime = outputFormat.format(inputFormat.parse(firstGetTime));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return firstGetTime; // 値を返す（nullの場合もあり得る）
+    }
+
+    // 初回取得日を挿入
+    public void InsertFirstGetTime(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // SQLiteで現在時刻を設定する場合は CURRENT_TIMESTAMP を直接使用
+        db.execSQL("UPDATE " + Proverb_TABLE_NAME +
+                        " SET " + COLUMN_FIRST_GET_TIME + " = (DATETIME('now', '+9 hours')) WHERE id = ?",
+                new Object[]{String.valueOf(id)});
     }
 
 
