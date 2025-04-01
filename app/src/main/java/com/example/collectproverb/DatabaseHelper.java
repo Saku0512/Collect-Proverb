@@ -12,13 +12,17 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PrimitiveIterator;
+
 import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 16;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
+    private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
+    private static final String Bool_TIMESTAMP_Trigger = "update_bool_timestamp";
     private static final Integer FalseBool = 0;
     private static final Integer EnableBool = 1;
     private static final String COLUMN_ID = "id";
@@ -57,6 +61,28 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createButtonBoolTableQuery);
 
+        // proverbsテーブルのupdated_atを自動更新するトリガーを設定
+        String createProverbTriggerQuery = "CREATE TRIGGER " + Proverb_TIMESTAMP_Trigger + " "
+                + "AFTER UPDATE ON " + Proverb_TABLE_NAME + " "
+                + "FOR EACH ROW "
+                + "WHEN OLD." + COLUMN_UPDATED_AT + " = NEW." + COLUMN_UPDATED_AT + " "
+                + "BEGIN "
+                + "UPDATE " + Proverb_TABLE_NAME + " SET " + COLUMN_UPDATED_AT + " = DATETIME('now', '+9 hours') "
+                + "WHERE " + COLUMN_ID + " = OLD." + COLUMN_ID + "; "
+                + "END;";
+        db.execSQL(createProverbTriggerQuery);
+
+        // button_boolテーブルのupdated_atを自動更新するトリガーを設定
+        String createButtonBoolTriggerQuery = "CREATE TRIGGER " + Bool_TIMESTAMP_Trigger + " "
+                + "AFTER UPDATE ON " + Button_Bool_Table_Name + " "
+                + "FOR EACH ROW "
+                + "WHEN OLD." + COLUMN_UPDATED_AT + " = NEW." + COLUMN_UPDATED_AT + " "
+                + "BEGIN "
+                + "UPDATE " + Button_Bool_Table_Name + " SET " + COLUMN_UPDATED_AT + " = DATETIME('now', '+9 hours') "
+                + "WHERE " + COLUMN_ID + " = OLD." + COLUMN_ID + "; "
+                + "END;";
+        db.execSQL(createButtonBoolTriggerQuery);
+
         // Proverbの初期データを挿入
         insertInitialProverbsData(db);
         // BOOLの初期データを挿入
@@ -68,6 +94,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 古いテーブルを削除
         db.execSQL("DROP TABLE IF EXISTS " + Proverb_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Button_Bool_Table_Name);
+        db.execSQL("DROP TABLE IF EXISTS " + Proverb_TIMESTAMP_Trigger);
+        db.execSQL("DROP TABLE IF EXISTS " + Bool_TIMESTAMP_Trigger);
 
         // テーブル再作成
         onCreate(db);
