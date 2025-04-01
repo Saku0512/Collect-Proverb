@@ -181,11 +181,15 @@ public class MainActivity extends AppCompatActivity {
         TextView popup_proverb_content = popupView.findViewById(R.id.popup_proverb_content);
         TextView popup_get_day = popupView.findViewById(R.id.popup_get_day);
         TextView closeButton = popupView.findViewById(R.id.close_button);
+        TextView count = popupView.findViewById(R.id.popup_count);
 
         imageView.setImageResource((Integer) data.get("drawable_path"));
         popup_author.setText((String) data.get("speaker"));
         popup_proverb_content.setText((String) data.get("proverb"));
         popup_get_day.setText((String) data.get("created_at"));
+        Integer IntCount = (Integer) data.get("count");
+        String StringCount = String.valueOf(IntCount);
+        count.setText(StringCount);
 
         // ウィンドウのレイアウトパラメータを取得
         Window window = dialog.getWindow();
