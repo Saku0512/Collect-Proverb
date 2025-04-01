@@ -185,11 +185,17 @@ public class MainActivity extends AppCompatActivity {
         TextView popup_get_day = popupView.findViewById(R.id.popup_get_day);
         TextView closeButton = popupView.findViewById(R.id.close_button);
         TextView count = popupView.findViewById(R.id.popup_count);
+        String maybeYet = (String) data.get("first_get_time");
+        if (Objects.equals(maybeYet, "yet")) {
+            Integer id = databaseHelper.getIdByPath((Integer) data.get("drawable_path"));
+            databaseHelper.InsertFirstGetTime(id);
+            maybeYet = databaseHelper.getFirstTime(id);
+        }
 
         imageView.setImageResource((Integer) data.get("drawable_path"));
         popup_author.setText((String) data.get("speaker"));
         popup_proverb_content.setText((String) data.get("proverb"));
-        popup_get_day.setText((String) data.get("created_at"));
+        popup_get_day.setText(maybeYet);
         Integer IntCount = (Integer) data.get("count");
         String StringCount = String.valueOf(IntCount);
         count.setText(StringCount);

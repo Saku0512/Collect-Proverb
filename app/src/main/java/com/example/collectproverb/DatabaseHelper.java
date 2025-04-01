@@ -422,5 +422,34 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return resultMap; // 結果を返す
     }
 
+    // 初回取得日を取得
+    public String getFirstTime(int id) {
+        SQLiteDatabase db = this.getReadableDatabase();
+        String firstGetTime = null;
+
+        // SQLクエリを実行して COLUMN_FIRST_GET_TIME を取得
+        Cursor cursor = db.rawQuery("SELECT " + COLUMN_FIRST_GET_TIME +
+                        " FROM " + Proverb_TABLE_NAME +
+                        " WHERE id = ?",
+                new String[]{String.valueOf(id)});
+        if (cursor.moveToFirst()) {
+            // COLUMN_FIRST_GET_TIME の値を取得
+            firstGetTime = cursor.getString(0);
+        }
+        cursor.close(); // カーソルを閉じる
+        db.close();     // データベースを閉じる
+
+        return firstGetTime; // 値を返す（nullの場合もあり得る）
+    }
+
+    // 初回取得日を挿入
+    public void InsertFirstGetTime(int id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        // SQLiteで現在時刻を設定する場合は CURRENT_TIMESTAMP を直接使用
+        db.execSQL("UPDATE " + Proverb_TABLE_NAME +
+                        " SET " + COLUMN_FIRST_GET_TIME + " = CURRENT_TIMESTAMP WHERE id = ?",
+                new Object[]{String.valueOf(id)});
+    }
+
 
 }
