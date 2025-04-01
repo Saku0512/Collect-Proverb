@@ -106,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        checkButtonState(getButton);
+
         // 画像が押された時の処理
         setupBadgeClickListeners();
 
