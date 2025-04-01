@@ -22,7 +22,7 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 23;
+    private static final int DATABASE_VERSION = 24;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Daily_Proverb_Table_Name = "daily_proverb";
@@ -74,6 +74,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createDailyProverbTableQuery = "CREATE TABLE " + Daily_Proverb_Table_Name + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PROVERB + " TEXT NOT NULL, " +
+                COLUMN_SPEAKER + " TEXT NOT NULL, " +
                 COLUMN_GET_TIME + " TEXT NOT NULL, " +
                 COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
                 COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
@@ -481,13 +482,14 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 一日ごとの格言を挿入
-    public void insertDailyProverb(String proverb, String day) { // dayはyyyy-MM-ddの形式
+    public void insertDailyProverb(String proverb, String speaker, String day) { // dayはyyyy-MM-ddの形式
         // SQLiteDatabaseインスタンスを取得
         SQLiteDatabase db = getWritableDatabase();
 
         // ContentValuesを使用してデータを挿入
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVERB, proverb); // COLUMN_PROVERB に格言を設定
+        values.put(COLUMN_SPEAKER, speaker); // COLUMN_SPEAKER に発言者を設定
         values.put(COLUMN_GET_TIME, day);   // COLUMN_GET_TIME に日付を設定
 
         // データベースに挿入
@@ -503,26 +505,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 対応する日付の格言を取得
-    public String getProverbByDate(String day) { // dayはyyyy-MM-ddの形式
+    public Map<String, String> getProverbAndSpeakerByDate(String day) { // dayはyyyy-MM-ddの形式
         // SQLiteDatabaseインスタンスを取得
         SQLiteDatabase db = getReadableDatabase();
 
-        // 初期化
-        String proverb = "";
+        // 初期化（結果を格納するMap）
+        Map<String, String> result = new HashMap<>();
+        result.put("proverb", ""); // データがない場合は空文字を返すため初期化
+        result.put("speaker", ""); // データがない場合は空文字を返すため初期化
 
         // クエリ実行
-        String query = "SELECT " + COLUMN_PROVERB +
+        String query = "SELECT " + COLUMN_PROVERB + ", " + COLUMN_SPEAKER +
                 " FROM " + Daily_Proverb_Table_Name +
                 " WHERE " + COLUMN_GET_TIME + " = ?";
         Cursor cursor = db.rawQuery(query, new String[]{day});
 
         try {
             if (cursor.moveToFirst()) {
-                // COLUMN_PROVERBの値を取得
-                proverb = cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROVERB));
+                // COLUMN_PROVERBとCOLUMN_SPEAKERの値を取得してMapに格納
+                result.put("proverb", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROVERB)));
+                result.put("speaker", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPEAKER)));
             }
         } catch (Exception e) {
-            Log.e("DatabaseError", "Error while trying to get proverb by date", e);
+            Log.e("DatabaseError", "Error while trying to get proverb and speaker by date", e);
         } finally {
             // カーソルとデータベースを閉じる
             if (cursor != null && !cursor.isClosed()) {
@@ -530,7 +535,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             }
         }
 
-        return proverb;
+        return result;
     }
 
 
