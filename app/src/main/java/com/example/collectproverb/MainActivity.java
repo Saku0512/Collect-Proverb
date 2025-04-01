@@ -390,8 +390,8 @@ public class MainActivity extends AppCompatActivity {
         String author = (parts.length > 1) ? parts[1] : "不明";
 
         // 自動的に改行を入れる
-        String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
-        quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
+        //String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
+        //quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
 
         // UIを更新
         questionTextView.setVisibility(View.GONE);
@@ -399,13 +399,15 @@ public class MainActivity extends AppCompatActivity {
         buttonNo.setVisibility(View.GONE);
         closeButton.setVisibility(View.GONE);
         closeButton_final.setVisibility(View.VISIBLE);
-        quoteTextView.setText(quoteFormatted);
+        //quoteTextView.setText(quoteFormatted);
+        quoteTextView.setText(quoteOriginal);
         quoteTextView.setVisibility(View.VISIBLE);
         quoteTextName.setText("- " + author);
         quoteTextName.setVisibility(View.VISIBLE);
 
         // 変数をfinalにする
-        final String quoteFinal = quoteFormatted;
+        //final String quoteFinal = quoteFormatted;
+        final String quoteFinal = quoteOriginal;
         final String authorFinal = author;
 
 

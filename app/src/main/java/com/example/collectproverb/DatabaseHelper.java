@@ -19,7 +19,7 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 18;
+    private static final int DATABASE_VERSION = 19;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
@@ -107,20 +107,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // 初期データを挿入するメソッド
     private void insertInitialProverbsData(SQLiteDatabase db) {
-        insertProverb(db, "成功する秘訣は、成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0);
+        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0);
         insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0);
-        insertProverb(db, "追い続ける勇気があるのなら、全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0);
-        insertProverb(db, "一番大事なことは、自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0);
+        insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0);
+        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0);
 
         insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0);
-        insertProverb(db, "上を向いている限り、絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0);
-        insertProverb(db, "いつかこの日さえも、楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0);
-        insertProverb(db, "不良とは、優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0);
+        insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0);
+        insertProverb(db, "いつかこの日さえも、\n楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0);
+        insertProverb(db, "不良とは、\n優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0);
 
-        insertProverb(db, "ことしは、計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0);
-        insertProverb(db, "もっと早く終わるように、少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0);
-        insertProverb(db, "明日が素晴らしい日だといけないから、うんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0);
-        insertProverb(db, "疑う余地のない純粋の歓びの一つは、勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0);
+        insertProverb(db, "ことしは、\n計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0);
+        insertProverb(db, "もっと早く終わるように、\n少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0);
+        insertProverb(db, "明日が素晴らしい日だといけないから、\nうんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0);
+        insertProverb(db, "疑う余地のない純粋の歓びの一つは、\n勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0);
     }
 
     // ボタンboolを挿入
