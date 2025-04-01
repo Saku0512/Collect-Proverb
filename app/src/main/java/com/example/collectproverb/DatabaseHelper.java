@@ -22,9 +22,10 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 22;
+    private static final int DATABASE_VERSION = 25;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
+    private static final String Daily_Proverb_Table_Name = "daily_proverb";
     private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
     private static final String Bool_TIMESTAMP_Trigger = "update_bool_timestamp";
     private static final Integer FalseBool = 0;
@@ -38,6 +39,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_DRAWABLE_PATH = "drawable_path";
     private static final String COLUMN_DRAWABLE_BOOl = "drawable_bool";
     private static final String COLUMN_BUTTON_BOOL = "bool";
+    private static final String COLUMN_GET_TIME = "get_time";
     private static final String COLUMN_FIRST_GET_TIME = "first_get_time";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
@@ -68,6 +70,16 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
                 COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createButtonBoolTableQuery);
+
+        String createDailyProverbTableQuery = "CREATE TABLE " + Daily_Proverb_Table_Name + " (" +
+                COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
+                COLUMN_PROVERB + " TEXT NOT NULL, " +
+                COLUMN_SPEAKER + " TEXT NOT NULL, " +
+                COLUMN_GET_TIME + " TEXT NOT NULL, " +
+                COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
+                COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
+        db.execSQL(createDailyProverbTableQuery);
+
 
         // proverbsテーブルのupdated_atを自動更新するトリガーを設定
         String createProverbTriggerQuery = "CREATE TRIGGER " + Proverb_TIMESTAMP_Trigger + " "
@@ -102,6 +114,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         // 古いテーブルを削除
         db.execSQL("DROP TABLE IF EXISTS " + Proverb_TABLE_NAME);
         db.execSQL("DROP TABLE IF EXISTS " + Button_Bool_Table_Name);
+        db.execSQL("DROP TABLE IF EXISTS " + Daily_Proverb_Table_Name);
         db.execSQL("DROP TABLE IF EXISTS " + Proverb_TIMESTAMP_Trigger);
         db.execSQL("DROP TABLE IF EXISTS " + Bool_TIMESTAMP_Trigger);
 
@@ -467,6 +480,64 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         " SET " + COLUMN_FIRST_GET_TIME + " = (DATETIME('now', '+9 hours')) WHERE id = ?",
                 new Object[]{String.valueOf(id)});
     }
+
+    // 一日ごとの格言を挿入
+    public void insertDailyProverb(String proverb, String speaker, String day) { // dayはyyyy-MM-ddの形式
+        // SQLiteDatabaseインスタンスを取得
+        SQLiteDatabase db = getWritableDatabase();
+
+        // ContentValuesを使用してデータを挿入
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PROVERB, proverb); // COLUMN_PROVERB に格言を設定
+        values.put(COLUMN_SPEAKER, speaker); // COLUMN_SPEAKER に発言者を設定
+        values.put(COLUMN_GET_TIME, day);   // COLUMN_GET_TIME に日付を設定
+
+        // データベースに挿入
+        long result = db.insert(Daily_Proverb_Table_Name, null, values);
+
+        if (result == -1) {
+            // 挿入失敗時の処理
+            Log.e("DatabaseError", "Failed to insert data into " + Daily_Proverb_Table_Name);
+        } else {
+            // 挿入成功時の処理
+            Log.d("DatabaseSuccess", "Data inserted successfully into " + Daily_Proverb_Table_Name);
+        }
+    }
+
+    // 対応する日付の格言を取得
+    public Map<String, String> getProverbAndSpeakerByDate(String day) { // dayはyyyy-MM-ddの形式
+        // SQLiteDatabaseインスタンスを取得
+        SQLiteDatabase db = getReadableDatabase();
+
+        // 初期化（結果を格納するMap）
+        Map<String, String> result = new HashMap<>();
+        result.put("proverb", ""); // データがない場合は空文字を返すため初期化
+        result.put("speaker", ""); // データがない場合は空文字を返すため初期化
+
+        // クエリ実行
+        String query = "SELECT " + COLUMN_PROVERB + ", " + COLUMN_SPEAKER +
+                " FROM " + Daily_Proverb_Table_Name +
+                " WHERE " + COLUMN_GET_TIME + " = ?";
+        Cursor cursor = db.rawQuery(query, new String[]{day});
+
+        try {
+            if (cursor.moveToFirst()) {
+                // COLUMN_PROVERBとCOLUMN_SPEAKERの値を取得してMapに格納
+                result.put("proverb", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROVERB)));
+                result.put("speaker", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPEAKER)));
+            }
+        } catch (Exception e) {
+            Log.e("DatabaseError", "Error while trying to get proverb and speaker by date", e);
+        } finally {
+            // カーソルとデータベースを閉じる
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+
+        return result;
+    }
+
 
 
 }

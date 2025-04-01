@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
@@ -51,6 +52,7 @@ public class MainActivity extends AppCompatActivity {
             "リラックスする時間はとれていますか？"
     };
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -91,8 +93,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        // 画面に出力する格言の処理
+        String nowDate = getNowDate();
+        Map<String, String> result = databaseHelper.getProverbAndSpeakerByDate(nowDate);
+        if (!result.get("proverb").isEmpty() && !result.get("speaker").isEmpty()) {
+            cloudText.setVisibility(View.GONE);
+            today_proverb.setText(result.get("proverb"));
+            today_proverb_author.setText("- " + result.get("speaker"));
+        }
 
-        //checkButtonState(getButton);
+
+        checkButtonState(getButton);
 
         // ボタンが押されたときの処理
         getButton.setOnClickListener(new View.OnClickListener() {
@@ -105,8 +116,6 @@ public class MainActivity extends AppCompatActivity {
                 saveLastClickDate();
             }
         });
-
-        checkButtonState(getButton);
 
         // 画像が押された時の処理
         setupBadgeClickListeners();
@@ -433,9 +442,12 @@ public class MainActivity extends AppCompatActivity {
                     "id",
                     getPackageName()
             ));
+            // 現在の日付を取得
+            String nowDate = getNowDate();
             //DB更新
             SQLiteDatabase db = databaseHelper.getWritableDatabase();
             databaseHelper.CountUp(id); // 格言の取得回数を更新
+            databaseHelper.insertDailyProverb(quoteFinal, authorFinal, nowDate);
             db.beginTransaction();
             try {
                 databaseHelper.FalseButtonBool(db);
@@ -460,5 +472,12 @@ public class MainActivity extends AppCompatActivity {
             // badgeの画像を切り替え
             badge.setImageResource(drawable_path);
         });
+    }
+
+    private String getNowDate() {
+        Date now = new Date();
+        @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
+        return dateFormat.format(now);
     }
 }
