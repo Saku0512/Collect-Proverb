@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
 
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
     private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"
@@ -442,6 +445,13 @@ public class MainActivity extends AppCompatActivity {
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
             // badgeの画像を切り替え
+            // **アニメーションをロード**
+            Animation glowAnimation = AnimationUtils.loadAnimation(this, R.anim.badge_glow);
+
+            // **アニメーションを開始**
+            if (badge != null) {
+                badge.startAnimation(glowAnimation);
+            }
             badge.setImageResource(drawable_path);
         });
     }
