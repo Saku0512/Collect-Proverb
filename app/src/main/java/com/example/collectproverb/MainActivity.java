@@ -389,10 +389,6 @@ public class MainActivity extends AppCompatActivity {
         final String quoteOriginal = parts[0];
         String author = (parts.length > 1) ? parts[1] : "不明";
 
-        // 自動的に改行を入れる
-        //String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
-        //quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
-
         // UIを更新
         questionTextView.setVisibility(View.GONE);
         buttonYes.setVisibility(View.GONE);
@@ -440,13 +436,12 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace(); // エラー内容をログに出力
             } finally {
                 db.endTransaction(); // トランザクション終了
-                //db.close(); // データベース閉じる
             }
             setupBadgeClickListeners();
             // ボタンの状態を更新
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
-            // badgeの画像を切り替え
+
             // **アニメーションをロード**
             Animation glowAnimation = AnimationUtils.loadAnimation(this, R.anim.badge_glow);
 
@@ -454,6 +449,7 @@ public class MainActivity extends AppCompatActivity {
             if (badge != null) {
                 badge.startAnimation(glowAnimation);
             }
+            // badgeの画像を切り替え
             badge.setImageResource(drawable_path);
         });
     }

@@ -194,7 +194,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } finally {
             // リソース解放を確実に実行
             if (cursor != null) cursor.close();
-            //db.close();
         }
 
         // 日付加工処理（3つの方法から選択）
@@ -226,7 +225,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             @SuppressLint("Range") String proverb = cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB));
             @SuppressLint("Range") String speaker = cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER));
             cursor.close();
-            db.close();
             return proverb + " - " + speaker;
         }
 
@@ -244,7 +242,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") Integer drawable_path = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_PATH));
             cursor.close();
-            db.close();
             return drawable_path;
         }
 
@@ -284,8 +281,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         } else {
             Log.d("DB_UPDATE", "No update performed. Current value: " + currentBoolValue);
         }
-
-        //db.close(); // DB を閉じる
     }
 
     // idを取得するメソッド
@@ -298,9 +293,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return cursor.getInt(0);
             }
         }
-        // Cursor を閉じる
-
-        //db.close();
         return null;
 
     }
