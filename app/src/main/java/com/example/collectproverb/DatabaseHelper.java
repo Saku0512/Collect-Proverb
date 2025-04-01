@@ -19,7 +19,7 @@ import android.util.ArrayMap;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 19;
+    private static final int DATABASE_VERSION = 20;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Proverb_TIMESTAMP_Trigger = "update_proverb_timestamp";
@@ -35,6 +35,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_DRAWABLE_PATH = "drawable_path";
     private static final String COLUMN_DRAWABLE_BOOl = "drawable_bool";
     private static final String COLUMN_BUTTON_BOOL = "bool";
+    private static final String COLUMN_FIRST_GET_TIME = "first_get_time";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
 
@@ -53,6 +54,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 COLUMN_COUNT + " INTEGER NOT NULL, " +
                 COLUMN_DRAWABLE_PATH + " INTEGER NOT NULL," +
                 COLUMN_DRAWABLE_BOOl + " INTEGER NOT NULL," +
+                COLUMN_FIRST_GET_TIME + " TEXT NOT NULL," +
                 COLUMN_CREATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')), " +
                 COLUMN_UPDATED_AT + " TEXT DEFAULT (DATETIME('now', '+9 hours')))";
         db.execSQL(createProverbTableQuery);
@@ -107,20 +109,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     // 初期データを挿入するメソッド
     private void insertInitialProverbsData(SQLiteDatabase db) {
-        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0);
-        insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0);
-        insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0);
-        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0);
+        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0, "yet");
+        insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0, "yet");
+        insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0, "yet");
+        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0, "yes");
 
-        insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0);
-        insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0);
-        insertProverb(db, "いつかこの日さえも、\n楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0);
-        insertProverb(db, "不良とは、\n優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0);
+        insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0, "yet");
+        insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0, "yet");
+        insertProverb(db, "いつかこの日さえも、\n楽しく思い出すことがあるだろう。", "ウェルギリウス", "encouragement", 3, 0, R.drawable.green_vergilius, 0, "yet");
+        insertProverb(db, "不良とは、\n優しさの事ではないかしら。", "太宰治", "encouragement", 4, 0, R.drawable.green_dazai, 0, "yet");
 
-        insertProverb(db, "ことしは、\n計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0);
-        insertProverb(db, "もっと早く終わるように、\n少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0);
-        insertProverb(db, "明日が素晴らしい日だといけないから、\nうんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0);
-        insertProverb(db, "疑う余地のない純粋の歓びの一つは、\n勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0);
+        insertProverb(db, "ことしは、\n計画的になまけていたんだ。", "野比のび太", "rest", 1, 0, R.drawable.blue_nobi, 0, "yet");
+        insertProverb(db, "もっと早く終わるように、\n少し休め。", "ジョージ・ハーバート", "rest", 2, 0, R.drawable.blue_herbert, 0, "yet");
+        insertProverb(db, "明日が素晴らしい日だといけないから、\nうんと休息するのさ。", "スヌーピー", "rest", 3, 0, R.drawable.blue_snoopy, 0, "yet");
+        insertProverb(db, "疑う余地のない純粋の歓びの一つは、\n勤勉の後の休息である。", "イマヌエル・カント", "rest", 4, 0, R.drawable.blue_kant, 0, "yet");
     }
 
     // ボタンboolを挿入
@@ -202,7 +204,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
 
     // 格言を挿入するメソッド
-    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool) {
+    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool, String first_get_time) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVERB, proverb);
         values.put(COLUMN_SPEAKER, speaker);
@@ -211,6 +213,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_COUNT, count);
         values.put(COLUMN_DRAWABLE_PATH, drawable_path);
         values.put(COLUMN_DRAWABLE_BOOl, drawable_bool);
+        values.put(COLUMN_FIRST_GET_TIME, first_get_time);
         db.insert(Proverb_TABLE_NAME, null, values);
     }
 
