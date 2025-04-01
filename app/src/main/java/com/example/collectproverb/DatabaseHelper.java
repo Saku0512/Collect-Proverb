@@ -447,7 +447,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         // SQLiteで現在時刻を設定する場合は CURRENT_TIMESTAMP を直接使用
         db.execSQL("UPDATE " + Proverb_TABLE_NAME +
-                        " SET " + COLUMN_FIRST_GET_TIME + " = CURRENT_TIMESTAMP WHERE id = ?",
+                        " SET " + COLUMN_FIRST_GET_TIME + " = (DATETIME('now', '+9 hours')) WHERE id = ?",
                 new Object[]{String.valueOf(id)});
     }
 
