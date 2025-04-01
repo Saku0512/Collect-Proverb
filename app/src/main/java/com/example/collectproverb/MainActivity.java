@@ -33,6 +33,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.HashMap;
 
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
     private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"
@@ -387,8 +390,8 @@ public class MainActivity extends AppCompatActivity {
         String author = (parts.length > 1) ? parts[1] : "不明";
 
         // 自動的に改行を入れる
-        String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
-        quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
+        //String quoteFormatted = quoteOriginal.replaceAll("([。！？])", "$1\n");
+        //quoteFormatted = quoteFormatted.replaceAll("(、)", "$1\n");
 
         // UIを更新
         questionTextView.setVisibility(View.GONE);
@@ -396,13 +399,15 @@ public class MainActivity extends AppCompatActivity {
         buttonNo.setVisibility(View.GONE);
         closeButton.setVisibility(View.GONE);
         closeButton_final.setVisibility(View.VISIBLE);
-        quoteTextView.setText(quoteFormatted);
+        //quoteTextView.setText(quoteFormatted);
+        quoteTextView.setText(quoteOriginal);
         quoteTextView.setVisibility(View.VISIBLE);
         quoteTextName.setText("- " + author);
         quoteTextName.setVisibility(View.VISIBLE);
 
         // 変数をfinalにする
-        final String quoteFinal = quoteFormatted;
+        //final String quoteFinal = quoteFormatted;
+        final String quoteFinal = quoteOriginal;
         final String authorFinal = author;
 
 
@@ -442,6 +447,13 @@ public class MainActivity extends AppCompatActivity {
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
             // badgeの画像を切り替え
+            // **アニメーションをロード**
+            Animation glowAnimation = AnimationUtils.loadAnimation(this, R.anim.badge_glow);
+
+            // **アニメーションを開始**
+            if (badge != null) {
+                badge.startAnimation(glowAnimation);
+            }
             badge.setImageResource(drawable_path);
         });
     }
