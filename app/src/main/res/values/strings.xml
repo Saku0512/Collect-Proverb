@@ -14,6 +14,6 @@
     <string name="buttonYes">Yes</string>
     <string name="buttonNo">No</string>
     <string name="popupImage">ポップアップイメージ</string>
-    <string name="popup_proverb_get_day">取得日: </string>
+    <string name="popup_proverb_get_day">初回取得日: </string>
     <string name="popup_proverb_count">取得回数: </string>
 </resources>
