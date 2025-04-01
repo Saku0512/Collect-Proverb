@@ -1,15 +1,54 @@
-*.iml
-.gradle
-/local.properties
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-/build
-/captures
-.externalNativeBuild
-.cxx
+# macOS固有のファイル
+*.DS_Store
+
+# Windows固有のファイル
+Thumbs.db
+ehthumbs.db
+desktop.ini
+
+# Android Studio の設定ファイル
+.idea/
+
+# Gradle キャッシュとビルド関連ファイル
+.gradle/
+.gradle/**
+build/
+captures/
+outputs/
 local.properties
+*.keystore
+*.jks
+
+# プロジェクトの一時ファイル
+*.log
+*.tmp
+*.swp
+*.swo
+*.swn
+
+# APK・AAB（誤って公開しないように）
+*.apk
+*.aab
+
+# NDKのビルド関連ファイル
+.externalNativeBuild
+.cxx/
+
+# Test関連の一時ファイル
+test-results/
+test-output/
+
+# Lint / Static Code Analysis
+lint/intermediates/
+lint/generated/
+
+# Kotlin特有のキャッシュ
+*.kotlin_metadata/
+*.kotlin_module/
+*.kotlin_*
+
+# Gradle wrapper関連の一時ファイル
+gradlew
+gradlew.bat
+gradle/wrapper/gradle-wrapper.properties
+gradle/wrapper/gradle-wrapper.jar
