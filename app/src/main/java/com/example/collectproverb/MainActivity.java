@@ -422,6 +422,7 @@ public class MainActivity extends AppCompatActivity {
             ));
             //DB更新
             SQLiteDatabase db = databaseHelper.getWritableDatabase();
+            databaseHelper.CountUp(id); // 格言の取得回数を更新
             db.beginTransaction();
             try {
                 databaseHelper.FalseButtonBool(db);
