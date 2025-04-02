@@ -6,23 +6,32 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.hardware.camera2.CameraExtensionSession;
+import android.security.keystore.KeyGenParameterSpec;
+import android.security.keystore.KeyProperties;
+import android.util.ArrayMap;
+import android.util.Base64;
 import android.util.Log;
+
+import java.security.KeyStore;
+
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.spec.GCMParameterSpec;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.PrimitiveIterator;
-
-import android.util.ArrayMap;
+import java.util.Objects;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 25;
+    private static final int DATABASE_VERSION = 38;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Daily_Proverb_Table_Name = "daily_proverb";
@@ -43,9 +52,112 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_FIRST_GET_TIME = "first_get_time";
     private static final String COLUMN_CREATED_AT = "created_at";
     private static final String COLUMN_UPDATED_AT = "updated_at";
+    private static final String KEY_ALIAS = "MyKeyAlias";
+    private static final String TRANSFORMATION = "AES/GCM/NoPadding";
+
+    private final KeyStore keyStore;
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        try {
+            keyStore = KeyStore.getInstance("AndroidKeyStore");
+            keyStore.load(null);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to initialize KeyStore", e);
+        }
+        createKey();
+    }
+
+    private void createKey() {
+        try {
+            if (!keyStore.containsAlias(KEY_ALIAS)) {
+                KeyGenerator keyGenerator = KeyGenerator.getInstance(
+                        KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore");
+
+                KeyGenParameterSpec keyGenParameterSpec = new KeyGenParameterSpec.Builder(
+                        KEY_ALIAS,
+                        KeyProperties.PURPOSE_ENCRYPT | KeyProperties.PURPOSE_DECRYPT)
+                        .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                        .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                        .setRandomizedEncryptionRequired(false)
+                        .build();
+
+                keyGenerator.init(keyGenParameterSpec);
+                keyGenerator.generateKey();
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to create key", e);
+        }
+    }
+
+    private String encrypt(String data) {
+        try {
+            // 固定IVを指定
+            byte[] fixedIv = new byte[12]; // GCMでは通常12バイトのIVを使用
+            Arrays.fill(fixedIv, (byte) 0); // 固定値を入れる（例えばゼロ）
+
+            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+
+            // 固定のIVを使って暗号化
+            GCMParameterSpec spec = new GCMParameterSpec(128, fixedIv);
+            cipher.init(Cipher.ENCRYPT_MODE, keyStore.getKey(KEY_ALIAS, null), spec);
+
+            byte[] encryptedData = cipher.doFinal(data.getBytes());
+
+            // IVと暗号化データを結合
+            byte[] combined = new byte[fixedIv.length + encryptedData.length];
+            System.arraycopy(fixedIv, 0, combined, 0, fixedIv.length);
+            System.arraycopy(encryptedData, 0, combined, fixedIv.length, encryptedData.length);
+
+            // 結果をBase64でエンコードして返す（改行なし）
+            return Base64.encodeToString(combined, Base64.NO_WRAP).trim();
+        } catch (Exception e) {
+            Log.e("Encryption", "Failed to encrypt data", e);
+            return null;
+        }
+    }
+
+
+    private String decrypt(String encryptedData) {
+        try {
+            if (encryptedData == null || encryptedData.isEmpty()) {
+                Log.e("Decryption", "Encrypted data is null or empty");
+                return null;
+            }
+
+            // Base64でデコードしてデータを取得
+            byte[] combined = Base64.decode(encryptedData, Base64.DEFAULT);
+
+            // 暗号化データ長が適切かチェック
+            if (combined.length < 12) {
+                Log.e("Decryption", "Invalid encrypted data length: " + combined.length);
+                return null;
+            }
+
+            // 最初の12バイトがIV（固定IV）
+            byte[] iv = new byte[12];
+            System.arraycopy(combined, 0, iv, 0, 12);
+
+            // 残りのデータが暗号化されたバイト列
+            byte[] encryptedBytes = new byte[combined.length - 12];
+            System.arraycopy(combined, 12, encryptedBytes, 0, combined.length - 12);
+
+            // 復号化のためのCipherを設定
+            Cipher cipher = Cipher.getInstance(TRANSFORMATION);
+
+            // GCMParameterSpecを使って復号化
+            GCMParameterSpec spec = new GCMParameterSpec(128, iv);
+            cipher.init(Cipher.DECRYPT_MODE, keyStore.getKey(KEY_ALIAS, null), spec);
+
+            // データを復号化
+            byte[] decryptedBytes = cipher.doFinal(encryptedBytes);
+
+            // 復号化されたバイト配列を文字列に変換して返す
+            return new String(decryptedBytes);
+        } catch (Exception e) {
+            Log.e("Decryption", "Failed to decrypt data", e);
+            return null;
+        }
     }
 
     @Override
@@ -53,7 +165,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         String createProverbTableQuery = "CREATE TABLE " + Proverb_TABLE_NAME + " (" +
                 COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
                 COLUMN_PROVERB + " TEXT NOT NULL, " +
-                COLUMN_SPEAKER + " TEXT, " +
+                COLUMN_SPEAKER + " TEXT NOT NULL, " +
                 COLUMN_TYPE + " TEXT NOT NULL, " +
                 COLUMN_TYPE_ID + " INTEGER NOT NULL, " +
                 COLUMN_COUNT + " INTEGER NOT NULL, " +
@@ -107,6 +219,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertInitialProverbsData(db);
         // BOOLの初期データを挿入
         insertInitialBoolData(db);
+        // 昨日の日付で初期データを挿入
+        insertInitialDailyProverbsData(db);
     }
 
     @Override
@@ -122,13 +236,26 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
+    // 格言を挿入するメソッド
+    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool, String first_get_time) {
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PROVERB, encrypt(proverb));
+        values.put(COLUMN_SPEAKER, encrypt(speaker));
+        values.put(COLUMN_TYPE, type);
+        values.put(COLUMN_TYPE_ID, typeId);
+        values.put(COLUMN_COUNT, count);
+        values.put(COLUMN_DRAWABLE_PATH, drawable_path);
+        values.put(COLUMN_DRAWABLE_BOOl, drawable_bool);
+        values.put(COLUMN_FIRST_GET_TIME, first_get_time != null ? encrypt(first_get_time) : null);
+        db.insert(Proverb_TABLE_NAME, null, values);
+    }
 
     // 初期データを挿入するメソッド
     private void insertInitialProverbsData(SQLiteDatabase db) {
-        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1,0, R.drawable.red_edison, 0, "yet");
+        insertProverb(db, "成功する秘訣は、\n成功するまでやり続けることである。", "トーマス・エジソン", "positive", 1, 0, R.drawable.red_edison, 0, "yet");
         insertProverb(db, "行動しなければ何も変わらない。", "ベンジャミン・フランクリン", "positive", 2, 0, R.drawable.red_benjamin, 0, "yet");
         insertProverb(db, "追い続ける勇気があるのなら、\n全ての夢は必ず実現する。", "ウォルト・ディズニー", "positive", 3, 0, R.drawable.red_disney, 0, "yet");
-        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0, "yes");
+        insertProverb(db, "一番大事なことは、\n自分の心と直感に従う勇気を持つことだ。", "スティーブ・ジョブズ", "positive", 4, 0, R.drawable.red_jobs, 0, "yet");
 
         insertProverb(db, "失敗と不可能とは違う。", "スーザン・B・アンソニー", "encouragement", 1, 0, R.drawable.green_anthony, 0, "yet");
         insertProverb(db, "上を向いている限り、\n絶対にいいことがある。", "三浦知良", "encouragement", 2, 0, R.drawable.green_kingkaz, 0, "yet");
@@ -147,6 +274,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         values.put(COLUMN_BUTTON_BOOL, EnableBool);
         db.insert(Button_Bool_Table_Name, null, values);
     }
+
 
     //ボタンboolを変更(有効化)
     public void EnableButtonBool(SQLiteDatabase db) {
@@ -218,21 +346,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return rawDate;
     }
 
-
-    // 格言を挿入するメソッド
-    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool, String first_get_time) {
-        ContentValues values = new ContentValues();
-        values.put(COLUMN_PROVERB, proverb);
-        values.put(COLUMN_SPEAKER, speaker);
-        values.put(COLUMN_TYPE, type);
-        values.put(COLUMN_TYPE_ID, typeId);
-        values.put(COLUMN_COUNT, count);
-        values.put(COLUMN_DRAWABLE_PATH, drawable_path);
-        values.put(COLUMN_DRAWABLE_BOOl, drawable_bool);
-        values.put(COLUMN_FIRST_GET_TIME, first_get_time);
-        db.insert(Proverb_TABLE_NAME, null, values);
-    }
-
     // 指定されたタイプからランダムな格言を取得するメソッド
     public String getRandomProverbByType(String type) {
         SQLiteDatabase db = this.getReadableDatabase();
@@ -241,8 +354,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 new String[]{type});
 
         if (cursor.moveToFirst()) {
-            @SuppressLint("Range") String proverb = cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB));
-            @SuppressLint("Range") String speaker = cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER));
+            @SuppressLint("Range") String proverb = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB)));
+            @SuppressLint("Range") String speaker = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER)));
             cursor.close();
             return proverb + " - " + speaker;
         }
@@ -254,9 +367,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     // 取得した格言のパスを取得するメソッド
     public Integer getDrawablePathBySpeaker(String speaker) {
         SQLiteDatabase db = this.getReadableDatabase();
+        speaker = encrypt(speaker);
         Cursor cursor = db.rawQuery("SELECT * FROM " + Proverb_TABLE_NAME +
                         " WHERE speaker = ?",
                 new String[]{speaker});
+        Integer num = cursor.getCount();
+
 
         if (cursor.moveToFirst()) {
             @SuppressLint("Range") Integer drawable_path = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_PATH));
@@ -332,7 +448,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 do {
                     @SuppressLint("Range") int id = cursor.getInt(cursor.getColumnIndex("id"));
                     @SuppressLint("Range") int drawablePath = cursor.getInt(cursor.getColumnIndex("drawable_path"));
-
                     idList.add(id);
                     drawablePathList.add(drawablePath);
                 } while (cursor.moveToNext());
@@ -361,49 +476,46 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return resultMap;
     }
 
+
     public ArrayMap<String, Object> getAllById(int id) {
         ArrayMap<String, Object> resultMap = new ArrayMap<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = null;
 
         try {
-            // クエリ実行：指定されたIDに一致する列を取得
             cursor = db.rawQuery("SELECT * FROM " + Proverb_TABLE_NAME + " WHERE id = ?", new String[]{String.valueOf(id)});
 
-            // 結果をArrayMapに追加
             if (cursor.moveToFirst()) {
-                // カラム数分ループしてデータを取得
-                for (int i = 0; i < cursor.getColumnCount(); i++) {
-                    String columnName = cursor.getColumnName(i); // カラム名取得
-                    Object value;
+                @SuppressLint("Range") String proverb = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB)));
+                @SuppressLint("Range") String speaker = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER)));
+                @SuppressLint("Range") String type = cursor.getString(cursor.getColumnIndex(COLUMN_TYPE));
+                @SuppressLint("Range") int typeId = cursor.getInt(cursor.getColumnIndex(COLUMN_TYPE_ID));
+                @SuppressLint("Range") int count = cursor.getInt(cursor.getColumnIndex(COLUMN_COUNT));
+                @SuppressLint("Range") int drawablePath = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_PATH));
+                @SuppressLint("Range") int drawableBool = cursor.getInt(cursor.getColumnIndex(COLUMN_DRAWABLE_BOOl));
+                @SuppressLint("Range") String firstGetTime = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_FIRST_GET_TIME)));
+                @SuppressLint("Range") String createdAt = cursor.getString(cursor.getColumnIndex(COLUMN_CREATED_AT));
+                @SuppressLint("Range") String updatedAt = cursor.getString(cursor.getColumnIndex(COLUMN_UPDATED_AT));
 
-                    // カラムの型に応じて値を取得
-                    switch (cursor.getType(i)) {
-                        case Cursor.FIELD_TYPE_INTEGER:
-                            value = cursor.getInt(i);
-                            break;
-                        case Cursor.FIELD_TYPE_FLOAT:
-                            value = cursor.getFloat(i);
-                            break;
-                        case Cursor.FIELD_TYPE_STRING:
-                            value = cursor.getString(i);
-                            break;
-                        case Cursor.FIELD_TYPE_BLOB:
-                            value = cursor.getBlob(i);
-                            break;
-                        default:
-                            value = null;
-                    }
-
-                    resultMap.put(columnName, value); // カラム名をキー、値をバリューとして追加
-                }
+                resultMap.put(COLUMN_ID, id);
+                resultMap.put(COLUMN_PROVERB, proverb);
+                resultMap.put(COLUMN_SPEAKER, speaker);
+                resultMap.put(COLUMN_TYPE, type);
+                resultMap.put(COLUMN_TYPE_ID, typeId);
+                resultMap.put(COLUMN_COUNT, count);
+                resultMap.put(COLUMN_DRAWABLE_PATH, drawablePath);
+                resultMap.put(COLUMN_DRAWABLE_BOOl, drawableBool);
+                resultMap.put(COLUMN_FIRST_GET_TIME, firstGetTime);
+                resultMap.put(COLUMN_CREATED_AT, createdAt);
+                resultMap.put(COLUMN_UPDATED_AT, updatedAt);
             }
         } finally {
-            // リソース解放
-            if (cursor != null) cursor.close();
+            if (cursor != null) {
+                cursor.close();
+            }
         }
 
-        return resultMap; // 結果を返す
+        return resultMap;
     }
 
     // proverbsテーブルのidとdrawable_boolを全て取得するメソッド
@@ -451,6 +563,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         if (cursor.moveToFirst()) {
             // COLUMN_FIRST_GET_TIME の値を取得
             firstGetTime = cursor.getString(0);
+            firstGetTime = decrypt(firstGetTime);
         }
         cursor.close(); // カーソルを閉じる
 
@@ -473,24 +586,70 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 初回取得日を挿入
+    @SuppressLint("Range")
     public void InsertFirstGetTime(int id) {
         SQLiteDatabase db = this.getWritableDatabase();
-        // SQLiteで現在時刻を設定する場合は CURRENT_TIMESTAMP を直接使用
-        db.execSQL("UPDATE " + Proverb_TABLE_NAME +
-                        " SET " + COLUMN_FIRST_GET_TIME + " = (DATETIME('now', '+9 hours')) WHERE id = ?",
-                new Object[]{String.valueOf(id)});
+        String currentTime = null;
+
+        try {
+            // SQLiteで現在時刻を取得（JST）
+            Cursor cursor = db.rawQuery("SELECT DATETIME('now', '+9 hours')", null);
+
+            if (cursor.moveToFirst()) {
+                // 現在時刻を文字列として取得
+                currentTime = cursor.getString(0); // インデックス 0 を指定
+            }
+            cursor.close();
+
+            // 暗号化処理を適用
+            if (currentTime != null) {
+                String encryptedTime = encrypt(currentTime);
+
+                // SQL文で更新処理
+                if (encryptedTime != null) {
+                    ContentValues values = new ContentValues();
+                    values.put(COLUMN_FIRST_GET_TIME, encryptedTime);
+                    int rowsAffected = db.update(Proverb_TABLE_NAME, values, COLUMN_ID + " = ?", new String[]{String.valueOf(id)});
+                    Log.d("InsertFirstGetTime", "Rows affected: " + rowsAffected + " for id: " + id);
+                } else {
+                    Log.e("InsertFirstGetTime", "Failed to encrypt current time for id: " + id);
+                }
+            } else {
+                Log.e("InsertFirstGetTime", "Failed to get current time for id: " + id);
+            }
+        } catch (Exception e) {
+            Log.e("InsertFirstGetTime", "Error inserting first get time for id: " + id, e);
+        }
+    }
+
+    private void insertInitialDailyProverbsData(SQLiteDatabase db) {
+        // 昨日の日付を取得
+        Calendar cal = Calendar.getInstance();
+        cal.add(Calendar.DATE, -1);
+        Date yesterday = cal.getTime();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+        String yesterdayDate = sdf.format(yesterday);
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_PROVERB, encrypt("初期の格言"));
+        values.put(COLUMN_SPEAKER, encrypt("初期のスピーカー"));
+        values.put(COLUMN_GET_TIME, yesterdayDate);
+
+        // 例: 昨日の日付で初期データを挿入
+        //insertDailyProverb("初期の格言", "初期のスピーカー", yesterdayDate);
+        db.insert(Daily_Proverb_Table_Name, null, values);
     }
 
     // 一日ごとの格言を挿入
-    public void insertDailyProverb(String proverb, String speaker, String day) { // dayはyyyy-MM-ddの形式
+    public void insertDailyProverb(String proverb, String speaker, String day) throws ParseException { // dayはyyyy-MM-ddの形式
         // SQLiteDatabaseインスタンスを取得
         SQLiteDatabase db = getWritableDatabase();
 
         // ContentValuesを使用してデータを挿入
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PROVERB, proverb); // COLUMN_PROVERB に格言を設定
-        values.put(COLUMN_SPEAKER, speaker); // COLUMN_SPEAKER に発言者を設定
-        values.put(COLUMN_GET_TIME, day);   // COLUMN_GET_TIME に日付を設定
+        values.put(COLUMN_PROVERB, encrypt(proverb)); // COLUMN_PROVERB に格言を設定
+        values.put(COLUMN_SPEAKER, encrypt(speaker)); // COLUMN_SPEAKER に発言者を設定
+        values.put(COLUMN_GET_TIME, encrypt(day));   // COLUMN_GET_TIME に日付を設定
 
         // データベースに挿入
         long result = db.insert(Daily_Proverb_Table_Name, null, values);
@@ -505,39 +664,37 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 対応する日付の格言を取得
-    public Map<String, String> getProverbAndSpeakerByDate(String day) { // dayはyyyy-MM-ddの形式
-        // SQLiteDatabaseインスタンスを取得
-        SQLiteDatabase db = getReadableDatabase();
-
-        // 初期化（結果を格納するMap）
-        Map<String, String> result = new HashMap<>();
-        result.put("proverb", ""); // データがない場合は空文字を返すため初期化
-        result.put("speaker", ""); // データがない場合は空文字を返すため初期化
-
-        // クエリ実行
-        String query = "SELECT " + COLUMN_PROVERB + ", " + COLUMN_SPEAKER +
-                " FROM " + Daily_Proverb_Table_Name +
-                " WHERE " + COLUMN_GET_TIME + " = ?";
-        Cursor cursor = db.rawQuery(query, new String[]{day});
+    public ArrayMap<String, String> getProverbAndSpeakerByDate(String date) {
+        date = encrypt(date);
+        SQLiteDatabase db = this.getReadableDatabase();
+        ArrayMap<String, String> proverb = new ArrayMap<>();
+        Cursor cursor = null;
 
         try {
-            if (cursor.moveToFirst()) {
-                // COLUMN_PROVERBとCOLUMN_SPEAKERの値を取得してMapに格納
-                result.put("proverb", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_PROVERB)));
-                result.put("speaker", cursor.getString(cursor.getColumnIndexOrThrow(COLUMN_SPEAKER)));
+            if (date != null) {
+                String query = "SELECT " + COLUMN_PROVERB + ", " + COLUMN_SPEAKER +
+                        " FROM " + Daily_Proverb_Table_Name +
+                        " WHERE " + COLUMN_GET_TIME + " = ?";
+
+                cursor = db.rawQuery(query, new String[]{date});
+                Integer num = cursor.getCount();
+
+                if (/*cursor != null &&*/ cursor.moveToFirst()) {
+                    @SuppressLint("Range") String mProverb = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_PROVERB)));
+                    @SuppressLint("Range") String mSpeaker = decrypt(cursor.getString(cursor.getColumnIndex(COLUMN_SPEAKER)));
+                    proverb.put("proverb", mProverb);
+                    proverb.put("speaker", mSpeaker);
+                }
+            } else {
+                Log.e("getProverbAndSpeakerByDate", "Date is null");
             }
         } catch (Exception e) {
-            Log.e("DatabaseError", "Error while trying to get proverb and speaker by date", e);
+            Log.e("DatabaseHelper", "Error getting proverb by date", e);
         } finally {
-            // カーソルとデータベースを閉じる
-            if (cursor != null && !cursor.isClosed()) {
+            if (cursor != null) {
                 cursor.close();
             }
         }
-
-        return result;
+        return proverb;
     }
-
-
-
 }
