@@ -4,7 +4,7 @@
     <string name="no_proverb_yet">まだ格言を取得していません</string>
     <string name="cloud_description">背景の雲</string>
     <string name="get_proverb_button">今日の格言を受け取る</string>
-    <string name="proverb_list">格言一覧</string>
+    <string name="proverb_list">格言バッジ一覧</string>
     <string name="list_description">格言一覧の背景</string>
     <string name="unopened_badge_description">未開放のバッジ</string>
     <string name="popup_close_button">×</string>
