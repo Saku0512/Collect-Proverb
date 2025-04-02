@@ -96,10 +96,15 @@ public class MainActivity extends AppCompatActivity {
         // 画面に出力する格言の処理
         String nowDate = getNowDate();
         Map<String, String> result = databaseHelper.getProverbAndSpeakerByDate(nowDate);
-        if (!result.get("proverb").isEmpty() && !result.get("speaker").isEmpty()) {
-            cloudText.setVisibility(View.GONE);
-            today_proverb.setText(result.get("proverb"));
-            today_proverb_author.setText("- " + result.get("speaker"));
+        if (result != null) {
+            String proverb = result.get("proverb");
+            String speaker = result.get("speaker");
+
+            if (proverb != null && !proverb.isEmpty() && speaker != null && !speaker.isEmpty()) {
+                cloudText.setVisibility(View.GONE);
+                today_proverb.setText(proverb);
+                today_proverb_author.setText("- " + speaker);
+            }
         }
 
 
@@ -168,14 +173,18 @@ public class MainActivity extends AppCompatActivity {
 
                         Log.d("BadgeClick", "Clicked Badge ID: " + badgeNumber); // デバッグログに出力
 
-                        handleBadgeClick(badgeNumber); // クリックされたバッジ番号で処理を実行
+                        try {
+                            handleBadgeClick(badgeNumber); // クリックされたバッジ番号で処理を実行
+                        } catch (ParseException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
                 });
             }
         }
     }
 
-    private void handleBadgeClick(int badgeNumber) {
+    private void handleBadgeClick(int badgeNumber) throws ParseException {
         // badgeNumberでDB検索してデータを取得
         ArrayMap<String, Object> data = databaseHelper.getAllById(badgeNumber);
 
@@ -201,6 +210,10 @@ public class MainActivity extends AppCompatActivity {
             Integer id = databaseHelper.getIdByPath((Integer) data.get("drawable_path"));
             databaseHelper.InsertFirstGetTime(id);
             maybeYet = databaseHelper.getFirstTime(id);
+        } else {
+            SimpleDateFormat inputFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
+            SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy年MM月dd日", Locale.getDefault());
+            maybeYet = outputFormat.format(Objects.requireNonNull(inputFormat.parse(maybeYet)));
         }
 
         imageView.setImageResource((Integer) data.get("drawable_path"));
@@ -447,7 +460,11 @@ public class MainActivity extends AppCompatActivity {
             //DB更新
             SQLiteDatabase db = databaseHelper.getWritableDatabase();
             databaseHelper.CountUp(id); // 格言の取得回数を更新
-            databaseHelper.insertDailyProverb(quoteFinal, authorFinal, nowDate);
+            try {
+                databaseHelper.insertDailyProverb(quoteFinal, authorFinal, nowDate);
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            }
             db.beginTransaction();
             try {
                 databaseHelper.FalseButtonBool(db);
