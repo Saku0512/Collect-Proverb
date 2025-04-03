@@ -1,4 +1,4 @@
-package com.example.collectproverb;
+package com.collectproverb.collectproverb;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
