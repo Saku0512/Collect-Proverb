@@ -31,7 +31,7 @@ import java.util.Objects;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
     private static final String DATABASE_NAME = "ProverbDB";
-    private static final int DATABASE_VERSION = 41;
+    private static final int DATABASE_VERSION = 45;
     private static final String Proverb_TABLE_NAME = "proverbs";
     private static final String Button_Bool_Table_Name = "button_bool";
     private static final String Daily_Proverb_Table_Name = "daily_proverb";
@@ -68,6 +68,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         createKey();
     }
 
+    // 暗号化・復号に用いる暗号鍵を生成(鍵スケジュールに使う初期秘密鍵) Android Keystoreで安全に保管
     private void createKey() {
         try {
             if (!keyStore.containsAlias(KEY_ALIAS)) {
@@ -90,16 +91,18 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // 文字列データを暗号化するメソッド AES128+base64
     private String encrypt(String data) {
         try {
             // 固定IVを指定
             byte[] fixedIv = new byte[12]; // GCMでは通常12バイトのIVを使用
-            Arrays.fill(fixedIv, (byte) 0); // 固定値を入れる（例えばゼロ）
+            Arrays.fill(fixedIv, (byte) 0); // 固定のIVを使って暗号化
 
             Cipher cipher = Cipher.getInstance(TRANSFORMATION);
 
-            // 固定のIVを使って暗号化
+            // 128ビット認証タグを指定
             GCMParameterSpec spec = new GCMParameterSpec(128, fixedIv);
+            // Android Keystoreから取得したキーで暗号化
             cipher.init(Cipher.ENCRYPT_MODE, keyStore.getKey(KEY_ALIAS, null), spec);
 
             byte[] encryptedData = cipher.doFinal(data.getBytes());
@@ -109,7 +112,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             System.arraycopy(fixedIv, 0, combined, 0, fixedIv.length);
             System.arraycopy(encryptedData, 0, combined, fixedIv.length, encryptedData.length);
 
-            // 結果をBase64でエンコードして返す（改行なし）
+            // AES256で出力されたバイト列をBase64でエンコードして返す（改行なし, 空白なし）
             return Base64.encodeToString(combined, Base64.NO_WRAP).trim();
         } catch (Exception e) {
             Log.e("Encryption", "Failed to encrypt data", e);
@@ -118,6 +121,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
 
+    // 暗号化された文字列データを復号するメソッド
     private String decrypt(String encryptedData) {
         try {
             if (encryptedData == null || encryptedData.isEmpty()) {
@@ -125,7 +129,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                 return null;
             }
 
-            // Base64でデコードしてデータを取得
+            // Base64でデコードしてデータ(バイト列)を取得
             byte[] combined = Base64.decode(encryptedData, Base64.DEFAULT);
 
             // 暗号化データ長が適切かチェック
@@ -160,6 +164,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         }
     }
 
+    // 初期起動時呼び出しメソッド
     @Override
     public void onCreate(SQLiteDatabase db) {
         String createProverbTableQuery = "CREATE TABLE " + Proverb_TABLE_NAME + " (" +
@@ -223,6 +228,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         insertInitialDailyProverbsData(db);
     }
 
+    // DATABASE_VERSIONを更新したら呼び出されるメソッド (DB再構築)
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // 古いテーブルを削除
@@ -647,9 +653,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
         // ContentValuesを使用してデータを挿入
         ContentValues values = new ContentValues();
-        values.put(COLUMN_PROVERB, encrypt(proverb)); // COLUMN_PROVERB に格言を設定
-        values.put(COLUMN_SPEAKER, encrypt(speaker)); // COLUMN_SPEAKER に発言者を設定
-        values.put(COLUMN_GET_TIME, encrypt(day));   // COLUMN_GET_TIME に日付を設定
+        values.put(COLUMN_PROVERB, encrypt(proverb)); // COLUMN_PROVERB に暗号化した格言を設定
+        values.put(COLUMN_SPEAKER, encrypt(speaker)); // COLUMN_SPEAKER に暗号化した発言者を設定
+        values.put(COLUMN_GET_TIME, encrypt(day));   // COLUMN_GET_TIME に暗号化した日付を設定
 
         // データベースに挿入
         long result = db.insert(Daily_Proverb_Table_Name, null, values);

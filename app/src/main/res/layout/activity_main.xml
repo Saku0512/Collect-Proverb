@@ -66,7 +66,7 @@
 
         <!-- 雲の中のテキスト -->
         <TextView
-            android:id="@+id/cloudText"
+            android:id="@+id/homeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/no_proverb_yet"
