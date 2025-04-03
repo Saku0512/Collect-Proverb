@@ -44,6 +44,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textSize="16sp"
+            android:textColor="@color/black"
             android:textAlignment="center"
             android:visibility="gone" />
 
@@ -53,6 +54,7 @@
             android:layout_height="wrap_content"
             android:text=""
             android:textSize="15sp"
+            android:textColor="@color/black"
             android:gravity="end"
             android:layout_gravity="end"
             android:visibility="gone" />
