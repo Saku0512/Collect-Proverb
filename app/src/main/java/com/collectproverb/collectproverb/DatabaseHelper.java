@@ -243,7 +243,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     }
 
     // 格言を挿入するメソッド
-    private void insertProverb(SQLiteDatabase db, String proverb, String speaker, String type, int typeId, int count, int drawable_path, int drawable_bool, String first_get_time) {
+    private void insertProverb(SQLiteDatabase db, String proverb, String speaker,
+                               String type, int typeId, int count, int drawable_path,
+                               int drawable_bool, String first_get_time) {
         ContentValues values = new ContentValues();
         values.put(COLUMN_PROVERB, encrypt(proverb));
         values.put(COLUMN_SPEAKER, encrypt(speaker));

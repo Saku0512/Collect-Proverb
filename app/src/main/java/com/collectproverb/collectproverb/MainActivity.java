@@ -273,15 +273,19 @@ public class MainActivity extends AppCompatActivity {
 
     // ボタンの有効化/無効化を設定
     private void checkButtonState(Button getButton) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase(); // 書き込み用のデータベースを取得
-        // ボタンが押された日と現在の日付を比較
-        String savedDateTime = databaseHelper.getBoolUpdatedAt(); // yyyy-MM-dd hh:mm:ss
+        // 書き込み用のデータベースを取得
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        // ボタンが押された日と現在の日付を比較  yyyy-MM-dd hh:mm:ss
+        String savedDateTime = databaseHelper.getBoolUpdatedAt();
         int ButtonBool = databaseHelper.getButtonBool();
         // 今日の日付を取得
-        String currentDay = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(new Date());
+        String currentDay = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",
+                Locale.getDefault()).format(new Date());
 
-        String savedDay = extractDayFromDate(savedDateTime); // savedDateTimeからddを抽出
-        String currentDayOnly = extractDayFromDate(currentDay); // currentDayからddを抽出
+        // savedDateTimeからddを抽出
+        String savedDay = extractDayFromDate(savedDateTime);
+        // currentDayからddを抽出
+        String currentDayOnly = extractDayFromDate(currentDay);
 
         if (savedDay.equals(currentDayOnly) && (ButtonBool == 0)) {
             // 今日押された場合
