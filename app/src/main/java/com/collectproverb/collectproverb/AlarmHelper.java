@@ -22,7 +22,7 @@ public class AlarmHelper {
         }
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         Intent intent = new Intent(context, AlarmReceiver.class);
-        intent.setAction("com.example.alarm.NOTIFY");
+        intent.setAction("com.collectproverb.alarm.NOTIFY");
         int flags = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
                 ? PendingIntent.FLAG_IMMUTABLE
                 : 0;
