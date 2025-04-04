@@ -1,5 +1,7 @@
 package com.collectproverb.collectproverb;
 
+import static com.collectproverb.collectproverb.AlarmHelper.setAlarm;
+
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
@@ -36,6 +38,10 @@ import java.util.TimeZone;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
     private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"が格納される
@@ -57,6 +63,13 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         EdgeToEdge.enable(this); // 画面に端から端までコンテンツを表示するための設定
         setContentView(R.layout.activity_main); // activity_main.xmlを画面に設定
+
+        setAlarm(this);
+        // 初回起動判定
+        if (PreferencesUtil.isFirstLaunch(this)) {
+            showNotificationPermissionDialog();
+            PreferencesUtil.setFirstLaunch(this, false); // 初回起動フラグを更新
+        }
 
         // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
@@ -501,5 +514,20 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         return dateFormat.format(now);
+    }
+
+    private void showNotificationPermissionDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("通知の許可")
+                .setMessage("通知を有効化しますか？")
+                .setPositiveButton("許可する", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 通知の設定
+                        setAlarm(MainActivity.this);
+                    }
+                })
+                .setNegativeButton("許可しない", null)
+                .show();
     }
 }
