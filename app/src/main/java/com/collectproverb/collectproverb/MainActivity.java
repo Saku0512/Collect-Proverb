@@ -1,9 +1,10 @@
-package com.example.collectproverb;
+package com.collectproverb.collectproverb;
+
+import static com.collectproverb.collectproverb.AlarmHelper.setAlarm;
 
 import android.annotation.SuppressLint;
 import android.content.SharedPreferences;
 import android.database.sqlite.SQLiteDatabase;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Bundle;
 import android.app.Dialog;
@@ -37,9 +38,13 @@ import java.util.TimeZone;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+
 public class MainActivity extends AppCompatActivity {
     private static final String PREF_NAME = "ProverbAppPreferences"; // SharedPreferencesにデータを保存するキー
-    private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"
+    private static final String PREF_LAST_CLICK_DATE = ""; // "yyyy-MM-dd"が格納される
     private int questionIndex = 0; // 現在の質問のインデックス
     private int score = 0; // Yesの回数をカウント
     private DatabaseHelper databaseHelper; // SQLiteデータベースのヘルパークラス
@@ -59,12 +64,19 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this); // 画面に端から端までコンテンツを表示するための設定
         setContentView(R.layout.activity_main); // activity_main.xmlを画面に設定
 
+        setAlarm(this);
+        // 初回起動判定
+        if (PreferencesUtil.isFirstLaunch(this)) {
+            showNotificationPermissionDialog();
+            PreferencesUtil.setFirstLaunch(this, false); // 初回起動フラグを更新
+        }
+
         // DatabaseHelperのインスタンスを作成(これでデータベースにアクセスする)
         databaseHelper = new DatabaseHelper(this);
         db = databaseHelper.getWritableDatabase(); // MainActivityでデータベースを開く
 
         Button getButton = findViewById(R.id.get_button);
-        TextView cloudText = findViewById(R.id.cloudText);
+        TextView homeText = findViewById(R.id.homeText);
         TextView today_proverb = findViewById(R.id.today_proverb);
         TextView today_proverb_author = findViewById(R.id.today_proverb_author);
 
@@ -93,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
-        // 画面に出力する格言の処理
+        // 画面に出力する格言の処理　既に格言を取得している場合に発火
         String nowDate = getNowDate();
         Map<String, String> result = databaseHelper.getProverbAndSpeakerByDate(nowDate);
         if (result != null) {
@@ -101,21 +113,21 @@ public class MainActivity extends AppCompatActivity {
             String speaker = result.get("speaker");
 
             if (proverb != null && !proverb.isEmpty() && speaker != null && !speaker.isEmpty()) {
-                cloudText.setVisibility(View.GONE);
+                homeText.setVisibility(View.GONE);
                 today_proverb.setText(proverb);
                 today_proverb_author.setText("- " + speaker);
             }
         }
 
-
+        // 取得ボタンの状態確認
         checkButtonState(getButton);
 
-        // ボタンが押されたときの処理
+        // 取得ボタンが押されたときの処理
         getButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // ポップアップを表示
-                showPopupDialog(cloudText, today_proverb, today_proverb_author, getButton);
+                showPopupDialog(homeText, today_proverb, today_proverb_author, getButton);
 
                 // ボタンが押された時点で現在の日付を保存
                 saveLastClickDate();
@@ -136,7 +148,7 @@ public class MainActivity extends AppCompatActivity {
     private final Map<Integer, Boolean> badgeStates = new HashMap<>(); // バッジの状態を管理
 
     private void setupBadgeClickListeners() {
-        // バッジの状態を初期化（例: true=有効, false=未開放）
+        // バッジの状態を初期化
         for (int i = 1; i <= 12; i++) {
             badgeStates.put(i, false); // 初期状態はすべて未開放
         }
@@ -274,14 +286,19 @@ public class MainActivity extends AppCompatActivity {
 
     // ボタンの有効化/無効化を設定
     private void checkButtonState(Button getButton) {
-        SQLiteDatabase db = databaseHelper.getWritableDatabase(); // 書き込み用のデータベースを取得
-        // ボタンが押された日と現在の日付を比較
-        String savedDateTime = databaseHelper.getBoolUpdatedAt(); // yyyy-mm-dd hh:mm:ss
+        // 書き込み用のデータベースを取得
+        SQLiteDatabase db = databaseHelper.getWritableDatabase();
+        // ボタンが押された日と現在の日付を比較  yyyy-MM-dd hh:mm:ss
+        String savedDateTime = databaseHelper.getBoolUpdatedAt();
         int ButtonBool = databaseHelper.getButtonBool();
-        String currentDay = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.getDefault()).format(new Date()); // 今日の日
+        // 今日の日付を取得
+        String currentDay = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss",
+                Locale.getDefault()).format(new Date());
 
-        String savedDay = extractDayFromDate(savedDateTime); // savedDateTimeからddを抽出
-        String currentDayOnly = extractDayFromDate(currentDay); // currentDayからddを抽出
+        // savedDateTimeからddを抽出
+        String savedDay = extractDayFromDate(savedDateTime);
+        // currentDayからddを抽出
+        String currentDayOnly = extractDayFromDate(currentDay);
 
         if (savedDay.equals(currentDayOnly) && (ButtonBool == 0)) {
             // 今日押された場合
@@ -309,17 +326,10 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-    // 保存された日を取得する
-    private String getSavedClickDate() {
-        SharedPreferences sharedPreferences = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
-        return sharedPreferences.getString(PREF_LAST_CLICK_DATE, "");
-    }
-
     // ポップアップを表示する関数
-    private void showPopupDialog(TextView cloudText, TextView today_proverb, TextView today_proverb_author, Button getButton) {
+    private void showPopupDialog(TextView homeText, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         LayoutInflater inflater = LayoutInflater.from(this);
-        View popupView = inflater.inflate(R.layout.popup_layout, null);
+        View popupView = inflater.inflate(R.layout.popup_layout, null); // popup_layout.xmlの要素をセット
         Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(popupView);
@@ -327,7 +337,7 @@ public class MainActivity extends AppCompatActivity {
         // ダイアログが外をタッチしても閉じないようにする
         dialog.setCancelable(false);
 
-        // UI要素
+        // UI要素を取得
         TextView questionTextView = popupView.findViewById(R.id.questionTextView);
         TextView quoteTextView = popupView.findViewById(R.id.quoteTextView);
         TextView quoteTextName = popupView.findViewById(R.id.quoteTextName);
@@ -353,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
             ButtonYesParams.setMargins((int) (width * 0.10), 0, 0, 0); // 左マージンを10%に設定
             buttonYes.setLayoutParams(ButtonYesParams);
 
+            // "No"ボタンの左マージンを設定
             LinearLayout.LayoutParams ButtonNoParams = (LinearLayout.LayoutParams) buttonNo.getLayoutParams();
             ButtonNoParams.setMargins((int) (width * 0.03), 0, 0, 0); // 左マージンを3%に設定
             buttonNo.setLayoutParams(ButtonNoParams);
@@ -376,12 +387,14 @@ public class MainActivity extends AppCompatActivity {
         // Yesボタンの処理
         buttonYes.setOnClickListener(view -> {
             score++;
-            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
+            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, homeText,
+                    dialog, today_proverb, today_proverb_author, getButton);
         });
 
         // Noボタンの処理
         buttonNo.setOnClickListener(view -> {
-            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
+            nextQuestion(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, homeText,
+                    dialog, today_proverb, today_proverb_author, getButton);
         });
 
         // Closeボタンの処理
@@ -392,18 +405,25 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // 次の質問へ進む処理
-    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, TextView closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
+    private void nextQuestion(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo,
+                              TextView closeButton, Button closeButton_final, TextView homeText, Dialog dialog, TextView today_proverb,
+                              TextView today_proverb_author, Button getButton) {
         questionIndex++;
         if (questionIndex < questions.length) {
+            // 質問を切り替える
             questionTextView.setText(questions[questionIndex]);
         } else {
-            displayResult(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final, cloudText, dialog, today_proverb, today_proverb_author, getButton);
+            // 結果を表示
+            displayResult(questionTextView, quoteTextView, quoteTextName, buttonYes, buttonNo, closeButton, closeButton_final,
+                    homeText, dialog, today_proverb, today_proverb_author, getButton);
         }
     }
 
     // 結果を表示する処理
     @SuppressLint("SetTextI18n")
-    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes, Button buttonNo, TextView closeButton, Button closeButton_final, TextView cloudText, Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
+    private void displayResult(TextView questionTextView, TextView quoteTextView, TextView quoteTextName, Button buttonYes,
+                               Button buttonNo, TextView closeButton, Button closeButton_final, TextView homeText,
+                               Dialog dialog, TextView today_proverb, TextView today_proverb_author, Button getButton) {
         String selectedQuote;
 
         if (score == 0) {
@@ -425,22 +445,20 @@ public class MainActivity extends AppCompatActivity {
         buttonNo.setVisibility(View.GONE);
         closeButton.setVisibility(View.GONE);
         closeButton_final.setVisibility(View.VISIBLE);
-        //quoteTextView.setText(quoteFormatted);
         quoteTextView.setText(quoteOriginal);
         quoteTextView.setVisibility(View.VISIBLE);
         quoteTextName.setText("- " + author);
         quoteTextName.setVisibility(View.VISIBLE);
 
         // 変数をfinalにする
-        //final String quoteFinal = quoteFormatted;
         final String quoteFinal = quoteOriginal;
         final String authorFinal = author;
 
 
         // Closeボタンの処理
         closeButton_final.setOnClickListener(view -> {
-            //cloudText.setText(quote);  cloudText に格言をセット
-            cloudText.setVisibility(View.GONE);
+            //homeText.setText(quote);  homeText に格言をセット
+            homeText.setVisibility(View.GONE);
             today_proverb.setText(quoteFinal);
             today_proverb_author.setText("- " + authorFinal);
 
@@ -479,10 +497,10 @@ public class MainActivity extends AppCompatActivity {
             checkButtonState(getButton);
             dialog.dismiss(); // ポップアップを閉じる
 
-            // **アニメーションをロード**
+            // アニメーションをロード
             Animation glowAnimation = AnimationUtils.loadAnimation(this, R.anim.badge_glow);
 
-            // **アニメーションを開始**
+            // アニメーションを開始
             if (badge != null) {
                 badge.startAnimation(glowAnimation);
             }
@@ -496,5 +514,20 @@ public class MainActivity extends AppCompatActivity {
         @SuppressLint("SimpleDateFormat") SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         dateFormat.setTimeZone(TimeZone.getTimeZone("Asia/Tokyo"));
         return dateFormat.format(now);
+    }
+
+    private void showNotificationPermissionDialog() {
+        new AlertDialog.Builder(this)
+                .setTitle("通知の許可")
+                .setMessage("通知を有効化しますか？")
+                .setPositiveButton("許可する", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // 通知の設定
+                        setAlarm(MainActivity.this);
+                    }
+                })
+                .setNegativeButton("許可しない", null)
+                .show();
     }
 }

@@ -3,11 +3,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.collectproverb"
+    namespace = "com.collectproverb.collectproverb"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.collectproverb"
+        applicationId = "com.collectproverb.collectproverb"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
